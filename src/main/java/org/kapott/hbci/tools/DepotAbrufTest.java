@@ -26,7 +26,10 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.List;
 
+import org.kapott.hbci.GV.GVKUmsAll;
+import org.kapott.hbci.GV.GVWPDepotList;
 import org.kapott.hbci.GV.GVWPDepotUms;
 import org.kapott.hbci.GV.HBCIJob;
 import org.kapott.hbci.GV_Result.GVRKUms;
@@ -39,6 +42,8 @@ import org.kapott.hbci.manager.HBCIHandler;
 import org.kapott.hbci.manager.HBCIUtils;
 import org.kapott.hbci.passport.AbstractHBCIPassport;
 import org.kapott.hbci.passport.HBCIPassport;
+import org.kapott.hbci.passport.HBCIPassportPinTan;
+import org.kapott.hbci.passport.HBCIPassportRDHNew;
 import org.kapott.hbci.status.HBCIExecStatus;
 import org.kapott.hbci.status.HBCIMsgStatus;
 import org.kapott.hbci.structures.Konto;
@@ -94,8 +99,6 @@ import org.kapott.hbci.structures.Konto;
 //
 //# -- Beginn
 //client.passport.default=PinTan
-//default.hbciversion=300
-//log.loglevel.default=2
 //
 //client.passport.PinTan.filename=/home/jonas/java/hbci/pintan_hbci4java.test
 //
@@ -137,14 +140,14 @@ public final class DepotAbrufTest
 
         // Nutzer-Passport initialisieren
         Object passportDescription="Passport für Kontoauszugs-Demo";
-        passport=AbstractHBCIPassport.getInstance("PinTan",new MyHBCICallback());
+        passport=AbstractHBCIPassport.getInstance(HBCIPassportPinTan.class,new MyHBCICallback());
         //passport.clearBPD();
 
         try {
             // ein HBCI-Handle für einen Nutzer erzeugen
             String version=passport.getHBCIVersion();
             //hbciHandle=new HBCIHandler("300", passport);
-            hbciHandle=new HBCIHandler((version.length()!=0)?version:"plus",passport);
+            hbciHandle=new HBCIHandler(passport);
 
             System.out.println("Alle Geschäftsvorfälle in HBCI4Java: " + hbciHandle.getKernel().getAllLowlevelJobs().toString());
             System.out.println("Unterstützte Geschäftsvorfälle der Bank: " + hbciHandle.getSupportedLowlevelJobs().toString());
@@ -156,10 +159,11 @@ public final class DepotAbrufTest
             //Konten ausgeben
             System.out.println("Kontenliste:");
             System.out.println("------------");
-            Konto[] konten = passport.getAccounts();
-            for (int i=0; i<konten.length; i++) {
-                System.out.println("Konto " + i + ":  " + konten[i]);
-            }            
+            List<Konto> konten = passport.getAccounts();
+			for ( Konto k : konten )
+			{
+				System.out.println( "Konto: " + k );
+			}            
             
             BufferedReader rd = new BufferedReader(new InputStreamReader(System.in));
             String line;
@@ -170,7 +174,7 @@ public final class DepotAbrufTest
                 line = rd.readLine();
                 try {
                     umsatzkto = Integer.parseInt(line);
-                    if (umsatzkto >= -1 && umsatzkto < konten.length) {
+                    if (umsatzkto >= -1 && umsatzkto < konten.size()) {
                         break;
                     } else {
                         System.out.println("Ungültiges Konto: " + line);
@@ -184,7 +188,7 @@ public final class DepotAbrufTest
                 line = rd.readLine();
                 try {
                     depotkto = Integer.parseInt(line);
-                    if (depotkto >= -1 && depotkto < konten.length) {
+                    if (depotkto >= -1 && depotkto < konten.size()) {
                         break;
                     } else {
                         System.out.println("Ungültiges Konto: " + line);
@@ -196,11 +200,11 @@ public final class DepotAbrufTest
             
             // Umsätze auflisten (als Demo, dass es grundsätzlich funktioniert)
             if (umsatzkto >= 0)
-                analyzeReportOfTransactions(passport, hbciHandle, konten[umsatzkto]);
+                analyzeReportOfTransactions(passport, hbciHandle, konten.get( umsatzkto ) );
             
             // Depotinhalt auflisten
             if (depotkto >= 0)
-                analyzeDepot(passport, hbciHandle, konten[depotkto]);
+                analyzeDepot(passport, hbciHandle, konten.get( depotkto ) );
 
         } finally {
             if (hbciHandle!=null) {
@@ -218,7 +222,7 @@ public final class DepotAbrufTest
         // Konto myaccount=new Konto("DE","86055592","1234567890");
 
         // Job zur Abholung der Kontoauszüge erzeugen
-        HBCIJob auszug=hbciHandle.newJob("KUmsAll");
+        HBCIJob auszug=new GVKUmsAll(hbciHandle);
         auszug.setParam("my",myaccount);
         // evtl. Datum setzen, ab welchem die Auszüge geholt werden sollen
         // job.setParam("startdate","21.5.2003");
@@ -278,7 +282,7 @@ public final class DepotAbrufTest
         myaccount.curr = null;
 
         // Job zur Abholung des Depotbestands erzeugen
-        HBCIJob auszug=hbciHandle.newJob("WPDepotList");
+        HBCIJob auszug=new GVWPDepotList(hbciHandle);
         auszug.setParam("my",myaccount);
         auszug.addToQueue();
 
@@ -308,7 +312,7 @@ public final class DepotAbrufTest
             System.out.println("Abruf der Depotumsätze nicht unterstützt!");
         } else {
             // Job zur Abholung der Depotumsätze erzeugen
-            HBCIJob ums=hbciHandle.newJob("WPDepotUms");
+            HBCIJob ums=new GVWPDepotUms(hbciHandle);
             ums.setParam("my",myaccount);
             // evtl. Datum setzen, ab welchem die Umsätze geholt werden sollen
             // job.setParam("startdate","21.5.2003");

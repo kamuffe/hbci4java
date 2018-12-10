@@ -9,12 +9,18 @@ import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.kapott.hbci.GV.GVSaldoReq;
 import org.kapott.hbci.GV.HBCIJob;
 import org.kapott.hbci.callback.HBCICallbackConsole;
 import org.kapott.hbci.manager.HBCIHandler;
 import org.kapott.hbci.manager.HBCIUtils;
+import org.kapott.hbci.manager.HBCIVersion;
+import org.kapott.hbci.manager.IHandlerData;
+import org.kapott.hbci.manager.MsgGen;
 import org.kapott.hbci.passport.AbstractHBCIPassport;
+import org.kapott.hbci.passport.HBCIPassport;
 import org.kapott.hbci.passport.HBCIPassportDDVPCSC;
+import org.kapott.hbci.passport.HBCIPassportPinTan;
 import org.kapott.hbci4java.AbstractTest;
 
 /**
@@ -55,11 +61,30 @@ public class PCSCTest extends AbstractTest
   @Test
   public void testFetchSaldo() throws Exception
   {
-    HBCIHandler handler = new HBCIHandler("210",passport);
-    HBCIJob job = handler.newJob("SaldoReq");
+	    IHandlerData handlerData = new IHandlerData() {
+
+			@Override
+			public HBCIPassport getPassport()
+			{
+				
+				HBCIPassportPinTan passport = new HBCIPassportPinTan(null, null);
+				passport.setHBCIVersion( HBCIVersion.HBCI_210.getId() );
+				return passport;
+			}
+
+			@Override
+			public MsgGen getMsgGen()
+			{
+				// TODO Auto-generated method stub
+				return null;
+			}
+	    	
+	    };
+    HBCIHandler handler = new HBCIHandler(passport);
+    HBCIJob job = new GVSaldoReq(handler);
     
     // wir nehmen wir die Saldo-Abfrage einfach das erste verfuegbare Konto
-    job.setParam("my",passport.getAccounts()[0]);
+    job.setParam("my",passport.getAccounts().get( 0 ));
     job.addToQueue();
     handler.execute();
   }
@@ -71,13 +96,10 @@ public class PCSCTest extends AbstractTest
   @Before
   public void beforeCard() throws Exception
   {
-    Properties props = new Properties();
     HBCIUtils.setParam("client.passport.DDV.path",dir.getAbsolutePath() + "/");
     HBCIUtils.setParam("client.passport.DDV.entryidx","1");
-    HBCIUtils.setParam("log.loglevel.default",Integer.toString(HBCIUtils.LOG_DEBUG2));
-//    HBCIUtils.init(props);
 
-    this.passport = (HBCIPassportDDVPCSC) AbstractHBCIPassport.getInstance("DDVPCSC",new HBCICallbackConsole());
+    this.passport = (HBCIPassportDDVPCSC) AbstractHBCIPassport.getInstance(HBCIPassportDDVPCSC.class,new HBCICallbackConsole());
   }
   
   /**

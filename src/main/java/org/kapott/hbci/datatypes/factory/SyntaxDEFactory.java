@@ -151,7 +151,7 @@ public class SyntaxDEFactory
             } catch (InstantiationException e) {
             } catch (IllegalAccessException e) {
             } catch (InvocationTargetException e) {
-                throw new ParseErrorException(HBCIUtilsInternal.getLocMsg("EXCMSG_PROT_ERRSYNDE",path),(Exception)e.getCause());
+                throw new ParseErrorException(HBCIUtils.getLocMsg("EXCMSG_PROT_ERRSYNDE",path),(Exception)e.getCause());
             }
             
             if (ret!=null) {
@@ -163,7 +163,7 @@ public class SyntaxDEFactory
                 factory.addToUsedPool(ret);
             } catch (RuntimeException e) {
                 factory.addToFreePool(ret);
-                throw new ParseErrorException(HBCIUtilsInternal.getLocMsg("EXCMSG_PROT_ERRSYNDE",path),(Exception)e.getCause());
+                throw new ParseErrorException(HBCIUtils.getLocMsg("EXCMSG_PROT_ERRSYNDE",path),(Exception)e.getCause());
             }
         }
         

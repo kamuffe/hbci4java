@@ -3,7 +3,9 @@ package org.kapott.hbci4java.sepa;
 import java.util.Properties;
 
 import org.junit.Test;
+import org.kapott.hbci.GV.GVKUmsAllCamt;
 import org.kapott.hbci.GV.HBCIJob;
+import org.kapott.hbci.manager.HBCIHandler;
 import org.kapott.hbci.passport.HBCIPassport;
 import org.kapott.hbci4java.AbstractTestGV;
 
@@ -21,8 +23,8 @@ public class TestGVKUmsAllCamt extends AbstractTestGV
         this.execute(new Execution() {
             
             @Override
-            public String getJobname() {
-                return "KUmsAllCamt";
+            public HBCIJob getJob(HBCIHandler handler) {
+                return new GVKUmsAllCamt(handler);
             }
             
             /**

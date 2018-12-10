@@ -32,6 +32,13 @@ import org.kapott.hbci.protocol.factory.MultipleDEsFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
+/**
+ * Einzelne Datenelementgruppe (DEG)
+ * <p>
+ * Diese bestehen aus logisch zusammengehörenden Datenelementen. Die darin enthaltenen
+ * Elemente werde dann als Gruppendatenelemente (GD) bezeichnet.
+ *
+ */
 public final class DEG
     extends SyntaxElement
 {

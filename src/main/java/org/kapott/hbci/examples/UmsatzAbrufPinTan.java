@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
+import org.kapott.hbci.GV.GVKUmsAll;
+import org.kapott.hbci.GV.GVSaldoReq;
 import org.kapott.hbci.GV.HBCIJob;
 import org.kapott.hbci.GV_Result.GVRKUms;
 import org.kapott.hbci.GV_Result.GVRKUms.UmsLine;
@@ -17,6 +19,7 @@ import org.kapott.hbci.manager.HBCIUtils;
 import org.kapott.hbci.manager.HBCIVersion;
 import org.kapott.hbci.passport.AbstractHBCIPassport;
 import org.kapott.hbci.passport.HBCIPassport;
+import org.kapott.hbci.passport.HBCIPassportPinTan;
 import org.kapott.hbci.status.HBCIExecStatus;
 import org.kapott.hbci.structures.Konto;
 import org.kapott.hbci.structures.Value;
@@ -78,7 +81,7 @@ public class UmsatzAbrufPinTan
     HBCIUtils.setParam("client.passport.PinTan.init","1");
 
     // Erzeugen des Passport-Objektes.
-    HBCIPassport passport = AbstractHBCIPassport.getInstance("PinTan", new MyHBCICallback());
+    HBCIPassport passport = AbstractHBCIPassport.getInstance( HBCIPassportPinTan.class, new MyHBCICallback());
     
     // Konfigurieren des Passport-Objektes.
     // Das kann alternativ auch alles ueber den Callback unten geschehen
@@ -103,23 +106,25 @@ public class UmsatzAbrufPinTan
     try
     {
       // Verbindung zum Server aufbauen
-      handle = new HBCIHandler(VERSION.getId(),passport);
+      handle = new HBCIHandler(passport);
 
       // Wir verwenden einfach das erste Konto, welches wir zur Benutzerkennung finden
-      Konto[] konten = passport.getAccounts();
-      if (konten == null || konten.length == 0)
-        error("Keine Konten ermittelbar");
+      List<Konto> konten = passport.getAccounts();
+      if (konten == null || konten.isEmpty())
+      {
+    	  error("Keine Konten ermittelbar");    	  
+      }
 
-      log("Anzahl Konten: " + konten.length);
-      Konto k = konten[0];
+      log("Anzahl Konten: " + konten.size());
+      Konto k = konten.get( 0 );
 
       // 1. Auftrag fuer das Abrufen des Saldos erzeugen
-      HBCIJob saldoJob = handle.newJob("SaldoReq");
+      HBCIJob saldoJob = new GVSaldoReq(handle);
       saldoJob.setParam("my",k); // festlegen, welches Konto abgefragt werden soll.
       saldoJob.addToQueue(); // Zur Liste der auszufuehrenden Auftraege hinzufuegen
 
       // 2. Auftrag fuer das Abrufen der Umsaetze erzeugen
-      HBCIJob umsatzJob = handle.newJob("KUmsAll");
+      HBCIJob umsatzJob = new GVKUmsAll(handle);
       umsatzJob.setParam("my",k); // festlegen, welches Konto abgefragt werden soll.
       umsatzJob.addToQueue(); // Zur Liste der auszufuehrenden Auftraege hinzufuegen
       
@@ -194,15 +199,6 @@ public class UmsatzAbrufPinTan
    */
   private static class MyHBCICallback extends AbstractHBCICallback
   {
-    /**
-     * @see org.kapott.hbci.callback.HBCICallback#log(java.lang.String, int, java.util.Date, java.lang.StackTraceElement)
-     */
-    @Override
-    public void log(String msg, int level, Date date, StackTraceElement trace)
-    {
-      // Ausgabe von Log-Meldungen bei Bedarf
-      // System.out.println(msg);
-    }
 
     /**
      * @see org.kapott.hbci.callback.HBCICallback#callback(org.kapott.hbci.passport.HBCIPassport, int, java.lang.String, int, java.lang.StringBuffer)

@@ -25,7 +25,11 @@ import org.kapott.hbci.GV.parsers.ISEPAParser;
 import org.kapott.hbci.GV.parsers.SEPAParserFactory;
 import org.kapott.hbci.comm.Comm;
 import org.kapott.hbci.manager.HBCIKernelImpl;
+import org.kapott.hbci.manager.HBCIVersion;
+import org.kapott.hbci.manager.IHandlerData;
 import org.kapott.hbci.manager.MsgGen;
+import org.kapott.hbci.passport.HBCIPassport;
+import org.kapott.hbci.passport.HBCIPassportPinTan;
 import org.kapott.hbci.protocol.MSG;
 import org.kapott.hbci.protocol.factory.MSGFactory;
 import org.kapott.hbci.sepa.SepaVersion;
@@ -43,7 +47,26 @@ public class TestBug1806 extends AbstractTest
   public void test001() throws Exception
   {
     String data = getFile("bugzilla-1806.txt");
-    HBCIKernelImpl kernel = new HBCIKernelImpl(null,"300");
+    
+    IHandlerData handlerData = new IHandlerData() {
+
+		@Override
+		public HBCIPassport getPassport()
+		{
+			
+			HBCIPassportPinTan passport = new HBCIPassportPinTan(null, null);
+			return passport;
+		}
+
+		@Override
+		public MsgGen getMsgGen()
+		{
+			// TODO Auto-generated method stub
+			return null;
+		}
+    	
+    };
+    HBCIKernelImpl kernel = new HBCIKernelImpl(handlerData);
     kernel.rawNewMsg("SepaDauerList");
     
     MsgGen gen = kernel.getMsgGen();

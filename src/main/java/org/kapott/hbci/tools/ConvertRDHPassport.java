@@ -30,6 +30,8 @@ import org.kapott.hbci.manager.HBCIUtils;
 import org.kapott.hbci.passport.AbstractHBCIPassport;
 import org.kapott.hbci.passport.AbstractRDHSWPassport;
 import org.kapott.hbci.passport.HBCIPassportInternal;
+import org.kapott.hbci.passport.HBCIPassportPinTan;
+import org.kapott.hbci.passport.HBCIPassportRDH;
 import org.kapott.hbci.passport.HBCIPassportRDHNew;
 
 /** <p>Tool zum Konvertieren von "alten" RDH-Passport-Dateien in "neue"
@@ -73,12 +75,12 @@ public class ConvertRDHPassport
         String nameOld=readParam(args,0,"Filename of old RDH passport file");
         HBCIUtils.setParam("client.passport.RDH.filename",nameOld);
         HBCIUtils.setParam("client.passport.RDH.init","1");
-        HBCIPassportInternal passportOld=(HBCIPassportInternal)AbstractHBCIPassport.getInstance("RDH",new HBCICallbackConsole());
+        HBCIPassportInternal passportOld=(HBCIPassportInternal)AbstractHBCIPassport.getInstance(HBCIPassportRDH.class,new HBCICallbackConsole());
         
         String nameNew=readParam(args,1,"Filename of new RDHNew passport file");
         HBCIUtils.setParam("client.passport.RDHNew.filename",nameNew);
         HBCIUtils.setParam("client.passport.RDHNew.init","0");
-        HBCIPassportInternal passportNew=(HBCIPassportInternal)AbstractHBCIPassport.getInstance("RDHNew",new HBCICallbackConsole());
+        HBCIPassportInternal passportNew=(HBCIPassportInternal)AbstractHBCIPassport.getInstance(HBCIPassportRDHNew.class,new HBCICallbackConsole());
 
         passportNew.setBLZ(passportOld.getBLZ());
         passportNew.setCountry(passportOld.getCountry());

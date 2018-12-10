@@ -7,6 +7,7 @@ import java.util.Properties;
 import org.kapott.hbci.GV_Result.GVRDauerEdit;
 import org.kapott.hbci.exceptions.InvalidUserDataException;
 import org.kapott.hbci.manager.HBCIHandler;
+import org.kapott.hbci.manager.HBCIUtils;
 import org.kapott.hbci.manager.HBCIUtilsInternal;
 import org.kapott.hbci.manager.LogFilter;
 import org.kapott.hbci.sepa.SepaVersion;
@@ -107,7 +108,7 @@ public class GVDauerSEPADel extends AbstractSEPAGV {
         
         if (paramName.equals("timeunit")) {
             if (!(value.equals("W") || value.equals("M"))) {
-                String msg=HBCIUtilsInternal.getLocMsg("EXCMSG_INV_TIMEUNIT",value);
+                String msg=HBCIUtils.getLocMsg("EXCMSG_INV_TIMEUNIT",value);
                 if (!HBCIUtilsInternal.ignoreError(getMainPassport(),"client.errors.ignoreWrongJobDataErrors",msg))
                     throw new InvalidUserDataException(msg);
             }
@@ -122,7 +123,7 @@ public class GVDauerSEPADel extends AbstractSEPAGV {
                         String value2=new DecimalFormat("00").format(Integer.parseInt(value));
 
                         if (!st.equals("00") && !twoDigitValueInList(value2,st)) {
-                            String msg=HBCIUtilsInternal.getLocMsg("EXCMSG_INV_TURNUS",value);
+                            String msg=HBCIUtils.getLocMsg("EXCMSG_INV_TURNUS",value);
                             if (!HBCIUtilsInternal.ignoreError(getMainPassport(),"client.errors.ignoreWrongJobDataErrors",msg))
                                 throw new InvalidUserDataException(msg);
                         }
@@ -134,7 +135,7 @@ public class GVDauerSEPADel extends AbstractSEPAGV {
                         String value2=new DecimalFormat("00").format(Integer.parseInt(value));
 
                         if (!st.equals("00") && !twoDigitValueInList(value2,st)) {
-                            String msg=HBCIUtilsInternal.getLocMsg("EXCMSG_INV_TURNUS",value);
+                            String msg=HBCIUtils.getLocMsg("EXCMSG_INV_TURNUS",value);
                             if (!HBCIUtilsInternal.ignoreError(getMainPassport(),"client.errors.ignoreWrongJobDataErrors",msg))
                                 throw new InvalidUserDataException(msg);
                         }
@@ -149,7 +150,7 @@ public class GVDauerSEPADel extends AbstractSEPAGV {
                     String st=res.getProperty("daysperweek");
 
                     if (st!=null && !st.equals("0") && st.indexOf(value)==-1) {
-                        String msg=HBCIUtilsInternal.getLocMsg("EXCMSG_INV_EXECDAY",value);
+                        String msg=HBCIUtils.getLocMsg("EXCMSG_INV_EXECDAY",value);
                         if (!HBCIUtilsInternal.ignoreError(getMainPassport(),"client.errors.ignoreWrongJobDataErrors",msg))
                             throw new InvalidUserDataException(msg);
                     }
@@ -160,7 +161,7 @@ public class GVDauerSEPADel extends AbstractSEPAGV {
                         String value2=new DecimalFormat("00").format(Integer.parseInt(value));
 
                         if (!st.equals("00") && !twoDigitValueInList(value2,st)) {
-                            String msg=HBCIUtilsInternal.getLocMsg("EXCMSG_INV_EXECDAY",value);
+                            String msg=HBCIUtils.getLocMsg("EXCMSG_INV_EXECDAY",value);
                             if (!HBCIUtilsInternal.ignoreError(getMainPassport(),"client.errors.ignoreWrongJobDataErrors",msg))
                                 throw new InvalidUserDataException(msg);
                         }

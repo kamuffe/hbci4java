@@ -25,7 +25,7 @@ public class HBCIPassportPinTanMemory extends HBCIPassportPinTan
    */
   public HBCIPassportPinTanMemory(HBCICallback callback, Object init)
   {
-    super(callback, init);
+    super(callback, init, null);
   }
 
   /**

@@ -67,9 +67,6 @@ public final class SyntaxCheck
         String checkValids_st=getArg(args,4,"Auf gültige Werte testen (0/1)");
         boolean checkValids=checkValids_st.equals("1");
         
-        Properties props=new Properties();
-        HBCIUtils.setParam("log.loglevel.default", "6");
-//        HBCIUtils.init(props,new HBCICallbackConsole());
         
         FileInputStream fi=new FileInputStream(ifilename);
         byte[]          buffer=new byte[1024];

@@ -27,6 +27,7 @@ import java.util.Properties;
 import org.kapott.hbci.GV_Result.GVRTermUeb;
 import org.kapott.hbci.exceptions.InvalidUserDataException;
 import org.kapott.hbci.manager.HBCIHandler;
+import org.kapott.hbci.manager.HBCIUtils;
 import org.kapott.hbci.manager.HBCIUtilsInternal;
 import org.kapott.hbci.manager.LogFilter;
 import org.kapott.hbci.status.HBCIMsgStatus;
@@ -111,7 +112,7 @@ public final class GVTermUeb
             }
 
             if (atLeastOne&&!found) {
-                String msg=HBCIUtilsInternal.getLocMsg("EXCMSG_INV_KEY",value);
+                String msg=HBCIUtils.getLocMsg("EXCMSG_INV_KEY",value);
                 if (!HBCIUtilsInternal.ignoreError(getMainPassport(),"client.errors.ignoreWrongJobDataErrors",msg))
                     throw new InvalidUserDataException(msg);
             }

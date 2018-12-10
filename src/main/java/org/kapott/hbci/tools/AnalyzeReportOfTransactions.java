@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import org.kapott.hbci.GV.GVKUmsAll;
 import org.kapott.hbci.GV.HBCIJob;
 import org.kapott.hbci.GV_Result.GVRKUms;
 import org.kapott.hbci.GV_Result.GVRKUms.UmsLine;
@@ -43,6 +44,7 @@ import org.kapott.hbci.manager.HBCIHandler;
 import org.kapott.hbci.manager.HBCIUtils;
 import org.kapott.hbci.passport.AbstractHBCIPassport;
 import org.kapott.hbci.passport.HBCIPassport;
+import org.kapott.hbci.passport.HBCIPassportPinTan;
 import org.kapott.hbci.status.HBCIExecStatus;
 import org.kapott.hbci.structures.Konto;
 
@@ -116,12 +118,12 @@ public final class AnalyzeReportOfTransactions
 
         // Nutzer-Passport initialisieren
         Object passportDescription="Passport für Kontoauszugs-Demo";
-        passport=AbstractHBCIPassport.getInstance("PinTan", new MyHBCICallback(), passportDescription);
+        passport=AbstractHBCIPassport.getInstance(HBCIPassportPinTan.class, new MyHBCICallback(), passportDescription);
 
         try {
             // ein HBCI-Handle für einen Nutzer erzeugen
             String version=passport.getHBCIVersion();
-            hbciHandle=new HBCIHandler((version.length()!=0)?version:"plus",passport);
+            hbciHandle=new HBCIHandler(passport);
 
             // Kontoauszüge auflisten
             analyzeReportOfTransactions(passport, hbciHandle);
@@ -180,13 +182,13 @@ public final class AnalyzeReportOfTransactions
 
     private static void analyzeReportOfTransactions(HBCIPassport hbciPassport, HBCIHandler hbciHandle) {
         // auszuwertendes Konto automatisch ermitteln (das erste verfügbare HBCI-Konto)
-        Konto myaccount=hbciPassport.getAccounts()[0];
+        Konto myaccount=hbciPassport.getAccounts().get( 0 );
         // wenn der obige Aufruf nicht funktioniert, muss die abzufragende
         // Kontoverbindung manuell gesetzt werden:
         // Konto myaccount=new Konto("DE","86055592","1234567890");
 
         // Job zur Abholung der Kontoauszüge erzeugen
-        HBCIJob auszug=hbciHandle.newJob("KUmsAll");
+        HBCIJob auszug=new GVKUmsAll(hbciHandle);
         auszug.setParam("my",myaccount);
         // evtl. Datum setzen, ab welchem die Auszüge geholt werden sollen
         // job.setParam("startdate","21.5.2003");

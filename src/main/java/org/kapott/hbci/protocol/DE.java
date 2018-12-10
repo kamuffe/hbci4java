@@ -34,11 +34,19 @@ import org.kapott.hbci.exceptions.NoValueGivenException;
 import org.kapott.hbci.exceptions.OverwriteException;
 import org.kapott.hbci.exceptions.ParseErrorException;
 import org.kapott.hbci.exceptions.PredelimErrorException;
+import org.kapott.hbci.manager.HBCIUtils;
 import org.kapott.hbci.manager.HBCIUtilsInternal;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+/**
+ * Einzelnes Datenelement (DE).
+ * <p>
+ * Diese entsprechen den einzelnen Feldern eines Segmentes. Die einfachste Form eines DE kann
+ * z.B. eine Bankleitzahl sein. Es ist jedoch möglich, dass sich hinter dem DE ein gesamtes,
+ * transparent eingestelltes Fremdformat verbirgt.
+ */
 public final class DE
     extends SyntaxElement
 {
@@ -210,7 +218,7 @@ public final class DE
         
         if (preDelim!=(char)0 && temp.charAt(0)!=preDelim) {
             if (len==0) {
-                throw new ParseErrorException(HBCIUtilsInternal.getLocMsg("EXCMSG_ENDOFSTRG",getPath()));
+                throw new ParseErrorException(HBCIUtils.getLocMsg("EXCMSG_ENDOFSTRG",getPath()));
             } 
 
             // HBCIUtils.log("error string: "+res.toString(),HBCIUtils.LOG_ERR);
@@ -225,7 +233,7 @@ public final class DE
         String predefined = predefs.get(getPath());
         if (predefined!=null) {
             if (!valueString.equals(predefined)) {
-                throw new ParseErrorException(HBCIUtilsInternal.getLocMsg("EXCMSG_PREDEFERR",
+                throw new ParseErrorException(HBCIUtils.getLocMsg("EXCMSG_PREDEFERR",
                                                                   new Object[] {getPath(),predefined,value}));
             }
         }

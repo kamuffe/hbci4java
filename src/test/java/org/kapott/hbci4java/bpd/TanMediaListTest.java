@@ -8,7 +8,10 @@ import java.util.StringTokenizer;
 import org.junit.Test;
 import org.kapott.hbci.manager.HBCIKernelImpl;
 import org.kapott.hbci.manager.HBCIUtils;
+import org.kapott.hbci.manager.IHandlerData;
 import org.kapott.hbci.manager.MsgGen;
+import org.kapott.hbci.passport.HBCIPassport;
+import org.kapott.hbci.passport.HBCIPassportPinTan;
 import org.kapott.hbci.protocol.MSG;
 import org.kapott.hbci.protocol.factory.MSGFactory;
 import org.kapott.hbci.rewrite.Rewrite;
@@ -27,7 +30,26 @@ public class TanMediaListTest extends AbstractTest
   public void test() throws Exception
   {
     String data = getFile("bpd-tanmedialist.txt");
-    HBCIKernelImpl kernel = new HBCIKernelImpl(null, "300");
+    
+    IHandlerData handlerData = new IHandlerData() {
+
+		@Override
+		public HBCIPassport getPassport()
+		{
+			
+			HBCIPassportPinTan passport = new HBCIPassportPinTan(null, null);
+			return passport;
+		}
+
+		@Override
+		public MsgGen getMsgGen()
+		{
+			// TODO Auto-generated method stub
+			return null;
+		}
+    	
+    };
+    HBCIKernelImpl kernel = new HBCIKernelImpl(handlerData);
 
     Rewrite.setData("msgName", "CustomMsg");
     // liste der rewriter erzeugen

@@ -28,12 +28,12 @@ import java.util.Properties;
 
 import org.kapott.hbci.callback.HBCICallbackConsole;
 import org.kapott.hbci.manager.HBCIInstitute;
-import org.kapott.hbci.manager.HBCIKernelFactory;
 import org.kapott.hbci.manager.HBCIKernelImpl;
 import org.kapott.hbci.manager.HBCIUtils;
 import org.kapott.hbci.passport.AbstractHBCIPassport;
 import org.kapott.hbci.passport.HBCIPassport;
 import org.kapott.hbci.passport.HBCIPassportInternal;
+import org.kapott.hbci.passport.HBCIPassportRDHNew;
 import org.kapott.hbci.passport.INILetter;
 
 public class CollectHashCodes
@@ -116,7 +116,6 @@ public class CollectHashCodes
         System.out.println();
         System.out.println(blz+": "+HBCIUtils.getNameForBLZ(blz));
         
-        HBCIUtils.setParam("log.loglevel.default","0");
         HBCIUtils.setParam("client.passport.RDHNew.filename","passports/"+blz+".passport");
         HBCIUtils.setParam("client.passport.RDHNew.init","1");
         
@@ -124,8 +123,8 @@ public class CollectHashCodes
         data.setProperty("blz",blz);
         data.setProperty("host",HBCIUtils.getHBCIHostForBLZ(blz));
         
-        HBCIPassportInternal passport=(HBCIPassportInternal)AbstractHBCIPassport.getInstance("RDHNew", new MyCallback(), data);
-        HBCIKernelImpl       kernel=(HBCIKernelImpl)HBCIKernelFactory.getKernel(null,"210");
+        HBCIPassportInternal passport=(HBCIPassportInternal)AbstractHBCIPassport.getInstance(HBCIPassportRDHNew.class, new MyCallback(), data);
+        HBCIKernelImpl       kernel=new HBCIKernelImpl( null );
         HBCIInstitute inst=new HBCIInstitute(kernel,passport,true);
         
         try {

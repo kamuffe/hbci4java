@@ -39,12 +39,6 @@ public class HBCICallbackUnsupported implements HBCICallback {
     }
 
     @Override
-    public void log(String msg, int level, Date date, StackTraceElement trace)
-    {
-        throw new UnsupportedOperationException("Unexpected HBCI callback");
-    }
-
-    @Override
     public boolean useThreadedCallback(HBCIPassport passport, int reason, String msg, int datatype, StringBuffer retData)
     {
         throw new UnsupportedOperationException("Unexpected HBCI callback");

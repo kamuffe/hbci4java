@@ -1,6 +1,7 @@
 package org.kapott.hbci4java.rsa;
 
 import java.io.File;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -54,7 +55,7 @@ public class HBCIPassportRSATest extends AbstractTest {
     public void beforeCard() throws Exception {
         HBCIUtils.setParam("client.passport.RSA.path", dir.getAbsolutePath() + "/");
         HBCIUtils.setParam("client.passport.RSA.entryidx", "1");
-        this.passport = (HBCIPassportRSA) AbstractHBCIPassport.getInstance("RSA", AbstractTest.callback);
+        this.passport = (HBCIPassportRSA) AbstractHBCIPassport.getInstance(HBCIPassportRSA.class, AbstractTest.callback);
     }
     
     @After
@@ -81,19 +82,21 @@ public class HBCIPassportRSATest extends AbstractTest {
         System.out.println("mySig  : " + passport.hasMySigKey());
         System.out.println("myEnc  : " + passport.hasMyEncKey());
         
-        Konto[] accounts = passport.getAccounts();
-        if (accounts != null) {
-            for (Konto account : accounts) {
-                System.out.println("Account:");
-                System.out.println(account.name);
-                System.out.println(account.name2);
-                System.out.println(account.blz);
-                System.out.println(account.number);
-                System.out.println(account.subnumber);
-                System.out.println(account.bic);
-                System.out.println(account.iban);
-            }
-        }
+		List<Konto> accounts = passport.getAccounts();
+		if ( accounts != null )
+		{
+			for ( Konto account : accounts )
+			{
+				System.out.println( "Account:" );
+				System.out.println( account.name );
+				System.out.println( account.name2 );
+				System.out.println( account.blz );
+				System.out.println( account.number );
+				System.out.println( account.subnumber );
+				System.out.println( account.bic );
+				System.out.println( account.iban );
+			}
+		}
     }
     
 //    @Test

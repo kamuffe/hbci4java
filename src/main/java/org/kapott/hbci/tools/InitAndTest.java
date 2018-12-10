@@ -33,6 +33,8 @@ import org.kapott.hbci.manager.HBCIHandler;
 import org.kapott.hbci.manager.HBCIUtils;
 import org.kapott.hbci.passport.AbstractHBCIPassport;
 import org.kapott.hbci.passport.HBCIPassport;
+import org.kapott.hbci.passport.HBCIPassportPinTan;
+import org.kapott.hbci.passport.HBCIPassportRDHNew;
 
 /** <p>Tool zum Initialisieren und Testen eines HBCI-Passports.  Dieses Tool dient
     einerseits als Vorlage für die Benutzung von <em>HBCI4Java</em> in eigenen Anwendungen und
@@ -83,7 +85,7 @@ public final class InitAndTest
             readBasicParams();
 
             readPassportParams();
-            passport=AbstractHBCIPassport.getInstance("PinTan", new MyCallback());
+            passport=AbstractHBCIPassport.getInstance(HBCIPassportPinTan.class, new MyCallback());
 
             readHBCIVersion();
             readActions();
@@ -94,8 +96,7 @@ public final class InitAndTest
             if (HBCIUtils.getParam("action.resetUPD").equals("1")) {
             	passport.clearUPD();
             }
-            hbciHandle=new HBCIHandler(HBCIUtils.getParam("client.passport.hbciversion.default"),
-                                       passport);
+            hbciHandle=new HBCIHandler(passport);
 
             /* HBCIExecStatus ret=hbciHandle.execute();
             System.out.println("ExecStatus");
@@ -147,7 +148,6 @@ public final class InitAndTest
     {
         readParam("client.connection.localPort",null,"local tcp-port to be used for outgoing connections");
         readParam("comm.standard.socks.server",null,"SOCKS server to be used for outgoing connections (will be ignored for PIN/TAN)");
-        readParam("log.loglevel.default","5","loglevel for HBCI4Java-messages (from 0(no logging) to 5(really heavy)");
         readParam("kernel.rewriter",HBCIUtils.getParam("kernel.rewriter"),"rewriter modules to be activated");
     }
     
@@ -197,7 +197,7 @@ public final class InitAndTest
         throws IOException
     {
         String pversion=passport.getHBCIVersion();
-        readParam("client.passport.hbciversion.default",((pversion.length()!=0)?pversion:"210"),"the hbci-version to be used; may be '201', '210', '220', '300' or 'plus'");
+//        readParam("client.passport.hbciversion.default",((pversion.length()!=0)?pversion:"210"),"the hbci-version to be used; may be '201', '210', '220', '300' or 'plus'");
     }
     
     private static void readActions()

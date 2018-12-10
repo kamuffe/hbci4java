@@ -21,6 +21,7 @@
 
 package org.kapott.hbci.passport;
 
+import java.util.List;
 import java.util.Properties;
 
 import org.kapott.hbci.callback.HBCICallback;
@@ -75,7 +76,7 @@ public interface HBCIPassport
      *  benötigt. */
     public final static String ROLE_WIT="4";
     
-    /** Gibt die gespeicherten BPD zurück. Die Auswertung der BPD seitens einer HBCI-Anwendung
+    /** Gibt die gespeicherten  Bank-Parameter-Daten (BPD) zurück. Die Auswertung der BPD seitens einer HBCI-Anwendung
         auf direktem Weg wird nicht empfohlen, da es keine Dokumentation über die
         Namensgebung der einzelnen Einträge gibt.
         @return die Bankparamterdaten oder <code>null</code>, falls diese nicht im
@@ -93,7 +94,7 @@ public interface HBCIPassport
                 verfügbar, so wird ein leerer String zurückgegeben. */
     public String getHBCIVersion();
     
-    /** Gibt die gespeicherten UPD (User-Parameter-Daten) zurück. Eine direkte
+    /** Gibt die gespeicherten User-Parameter-Daten (UPD) zurück. Eine direkte
         Auswertung des Inhalts dieses Property-Objektes wird nicht empfohlen, da
         die Benennung der einzelnen Einträge nicht explizit dokumentiert ist.
         @return die Userparameterdaten oder <code>null</code>, falls diese nicht im
@@ -124,7 +125,7 @@ public interface HBCIPassport
         kann. In diesem Fall müssen die Kontoinformationen anderweitig ermittelt werden (manuelle
         Eingabe des Anwenders).
         @return Array mit Kontoinformationen über verfügbare HBCI-Konten */ 
-    public Konto[] getAccounts();
+    public List<Konto> getAccounts();
     
     /** Ausfüllen fehlender Kontoinformationen. In der Liste der verfügbaren Konten (siehe
         {@link #getAccounts()}) wird nach einem Konto gesucht, welches die

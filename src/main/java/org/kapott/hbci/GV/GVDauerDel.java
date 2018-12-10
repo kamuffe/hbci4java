@@ -27,6 +27,7 @@ import java.util.Properties;
 import org.kapott.hbci.GV_Result.HBCIJobResultImpl;
 import org.kapott.hbci.exceptions.InvalidUserDataException;
 import org.kapott.hbci.manager.HBCIHandler;
+import org.kapott.hbci.manager.HBCIUtils;
 import org.kapott.hbci.manager.HBCIUtilsInternal;
 import org.kapott.hbci.manager.LogFilter;
 
@@ -89,7 +90,7 @@ public final class GVDauerDel
             String st_cantermdel=res.getProperty("cantermdel");
             
             if (st_cantermdel!=null && st_cantermdel.equals("N")) {
-                String msg=HBCIUtilsInternal.getLocMsg("EXCMSG_SCHEDDELSTANDORDUNAVAIL");
+                String msg=HBCIUtils.getLocMsg("EXCMSG_SCHEDDELSTANDORDUNAVAIL");
                 if (!HBCIUtilsInternal.ignoreError(getMainPassport(),"client.errors.ignoreWrongJobDataErrors",msg))
                     throw new InvalidUserDataException(msg);
             }

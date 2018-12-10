@@ -226,22 +226,22 @@ public class HBCICallbackSwing
                     needPTSecMech(currentData,"pt_method");
                     break;
                     
-                case NEED_PROXY_USER:
-                    if (!((Boolean)currentData.get("proxyRequested")).booleanValue())
-                        needProxyData(currentData);
-                    retData.replace(0,retData.length(),(String)currentData.get("proxy_user"));
-                    break;
-                case NEED_PROXY_PASS:
-                    if (!((Boolean)currentData.get("proxyRequested")).booleanValue())
-                        needProxyData(currentData);
-                    retData.replace(0,retData.length(),(String)currentData.get("proxy_pass"));
-                    break;
+//                case NEED_PROXY_USER:
+//                    if (!((Boolean)currentData.get("proxyRequested")).booleanValue())
+//                        needProxyData(currentData);
+//                    retData.replace(0,retData.length(),(String)currentData.get("proxy_user"));
+//                    break;
+//                case NEED_PROXY_PASS:
+//                    if (!((Boolean)currentData.get("proxyRequested")).booleanValue())
+//                        needProxyData(currentData);
+//                    retData.replace(0,retData.length(),(String)currentData.get("proxy_pass"));
+//                    break;
 
                 default:
-                    throw new HBCI_Exception(HBCIUtilsInternal.getLocMsg("EXCMSG_CALLB_UNKNOWN",Integer.toString(reason)));
+                    throw new HBCI_Exception(HBCIUtils.getLocMsg("EXCMSG_CALLB_UNKNOWN",Integer.toString(reason)));
             }
         } catch (Exception e) {
-            throw new HBCI_Exception(HBCIUtilsInternal.getLocMsg("EXCMSG_CALLB_ERR"),e);
+            throw new HBCI_Exception(HBCIUtils.getLocMsg("EXCMSG_CALLB_ERR"),e);
         }
     }
     
@@ -305,7 +305,7 @@ public class HBCICallbackSwing
             box2.add(ok);
             ((JComponent)win).getRootPane().setDefaultButton(ok);
             
-            JButton cancel=new JButton(HBCIUtilsInternal.getLocMsg("CANCEL"));
+            JButton cancel=new JButton(HBCIUtils.getLocMsg("CANCEL"));
             box2.add(cancel);
             box2.add(Box.createHorizontalGlue());
             
@@ -337,9 +337,9 @@ public class HBCICallbackSwing
         
         sync.startWaiting();
         if (aborted[0]==1)
-            throw new AbortedException(HBCIUtilsInternal.getLocMsg("EXCMSG_USR_ABORT"));
+            throw new AbortedException(HBCIUtils.getLocMsg("EXCMSG_USR_ABORT"));
         else if (aborted[0]==2)
-            throw new InvalidUserDataException(HBCIUtilsInternal.getLocMsg("EXCMSG_PWDONTMATCH"));
+            throw new InvalidUserDataException(HBCIUtils.getLocMsg("EXCMSG_PWDONTMATCH"));
     }
     
     private void correctAccountData(final Hashtable<String, Object> currentData,final String winname)
@@ -391,14 +391,14 @@ public class HBCICallbackSwing
             int idx=retData.indexOf("|");
             
             constr.gridx=0; constr.gridy=0;
-            l=new JLabel(HBCIUtilsInternal.getLocMsg("BLZ"));
+            l=new JLabel(HBCIUtils.getLocMsg("BLZ"));
             table.add(l,constr);
             constr.gridx++;
             final JTextField blz=new JTextField(retData.substring(0,idx),10);
             table.add(blz,constr);
 
             constr.gridx=0; constr.gridy++;
-            l=new JLabel(HBCIUtilsInternal.getLocMsg("ACCNUMBER"));
+            l=new JLabel(HBCIUtils.getLocMsg("ACCNUMBER"));
             table.add(l,constr);
             constr.gridx++;
             final JTextField number=new JTextField(retData.substring(idx+1),10);
@@ -414,7 +414,7 @@ public class HBCICallbackSwing
             box2.add(ok);
             ((JComponent)win).getRootPane().setDefaultButton(ok);
 
-            JButton cancel=new JButton(HBCIUtilsInternal.getLocMsg("CANCEL"));
+            JButton cancel=new JButton(HBCIUtils.getLocMsg("CANCEL"));
             box2.add(cancel);
             box2.add(Box.createHorizontalGlue());
 
@@ -438,7 +438,7 @@ public class HBCICallbackSwing
 
         sync.startWaiting();
         if (aborted[0])
-            throw new AbortedException(HBCIUtilsInternal.getLocMsg("EXCMSG_USR_ABORT")); 
+            throw new AbortedException(HBCIUtils.getLocMsg("EXCMSG_USR_ABORT")); 
     }
 
     private void correctIBANData(final Hashtable<String, Object> currentData,final String winname)
@@ -489,7 +489,7 @@ public class HBCICallbackSwing
             final StringBuffer retData=(StringBuffer)currentData.get("retData");
             
             constr.gridx=0; constr.gridy=0;
-            l=new JLabel(HBCIUtilsInternal.getLocMsg("IBAN"));
+            l=new JLabel(HBCIUtils.getLocMsg("IBAN"));
             table.add(l,constr);
             constr.gridx++;
             final JTextField iban=new JTextField(retData.toString(),10);
@@ -505,7 +505,7 @@ public class HBCICallbackSwing
             box2.add(ok);
             ((JComponent)win).getRootPane().setDefaultButton(ok);
 
-            JButton cancel=new JButton(HBCIUtilsInternal.getLocMsg("CANCEL"));
+            JButton cancel=new JButton(HBCIUtils.getLocMsg("CANCEL"));
             box2.add(cancel);
             box2.add(Box.createHorizontalGlue());
 
@@ -527,7 +527,7 @@ public class HBCICallbackSwing
 
         sync.startWaiting();
         if (aborted[0])
-            throw new AbortedException(HBCIUtilsInternal.getLocMsg("EXCMSG_USR_ABORT")); 
+            throw new AbortedException(HBCIUtils.getLocMsg("EXCMSG_USR_ABORT")); 
     }
 
     private void needRDHData(final Hashtable<String, Object> currentData)
@@ -563,7 +563,7 @@ public class HBCICallbackSwing
 
             box2=Box.createHorizontalBox();
             mainbox.add(box2);
-            box2.add(new JLabel(HBCIUtilsInternal.getLocMsg("CALLB_NEEDRDHDATA")));
+            box2.add(new JLabel(HBCIUtils.getLocMsg("CALLB_NEEDRDHDATA")));
             box2.add(Box.createHorizontalGlue());
             
             mainbox.add(Box.createVerticalStrut(10));
@@ -580,43 +580,43 @@ public class HBCICallbackSwing
             HBCIPassport passport=(HBCIPassport)currentData.get("passport");
             
             constr.gridx=0;constr.gridy=0;
-            table.add(new JLabel(HBCIUtilsInternal.getLocMsg("COUNTRY")),constr);
+            table.add(new JLabel(HBCIUtils.getLocMsg("COUNTRY")),constr);
             final JTextField input_country=new JTextField(passport.getCountry(),3);
             constr.gridx++;
             table.add(input_country,constr);
 
             constr.gridx=0;constr.gridy++;
-            table.add(new JLabel(HBCIUtilsInternal.getLocMsg("BLZ")),constr);
+            table.add(new JLabel(HBCIUtils.getLocMsg("BLZ")),constr);
             final JTextField input_blz=new JTextField(passport.getBLZ(),25);
             constr.gridx++;
             table.add(input_blz,constr);
 
             constr.gridx=0;constr.gridy++;
-            table.add(new JLabel(HBCIUtilsInternal.getLocMsg("HOST")),constr);
+            table.add(new JLabel(HBCIUtils.getLocMsg("HOST")),constr);
             final JTextField input_host=new JTextField(passport.getHost(),25);
             constr.gridx++;
             table.add(input_host,constr);
 
             constr.gridx=0;constr.gridy++;
-            table.add(new JLabel(HBCIUtilsInternal.getLocMsg("PORT")),constr);
+            table.add(new JLabel(HBCIUtils.getLocMsg("PORT")),constr);
             final JTextField input_port=new JTextField(passport.getPort().toString(),25);
             constr.gridx++;
             table.add(input_port,constr);
 
             constr.gridx=0;constr.gridy++;
-            table.add(new JLabel(HBCIUtilsInternal.getLocMsg("FILTER")),constr);
+            table.add(new JLabel(HBCIUtils.getLocMsg("FILTER")),constr);
             final JTextField input_filter=new JTextField(passport.getFilterType(),25);
             constr.gridx++;
             table.add(input_filter,constr);
 
             constr.gridx=0;constr.gridy++;
-            table.add(new JLabel(HBCIUtilsInternal.getLocMsg("USERID")),constr);
+            table.add(new JLabel(HBCIUtils.getLocMsg("USERID")),constr);
             final JTextField input_userid=new JTextField(passport.getUserId(),25);
             constr.gridx++;
             table.add(input_userid,constr);
             
             constr.gridx=0;constr.gridy++;
-            table.add(new JLabel(HBCIUtilsInternal.getLocMsg("CUSTOMERID")),constr);
+            table.add(new JLabel(HBCIUtils.getLocMsg("CUSTOMERID")),constr);
             final JTextField input_customerid=new JTextField(passport.getCustomerId(),25);
             constr.gridx++;constr.weightx=1;constr.weighty=1;
             table.add(input_customerid,constr);
@@ -630,7 +630,7 @@ public class HBCICallbackSwing
             box2.add(ok);
             ((JComponent)win).getRootPane().setDefaultButton(ok);
             
-            JButton cancel=new JButton(HBCIUtilsInternal.getLocMsg("CANCEL"));
+            JButton cancel=new JButton(HBCIUtils.getLocMsg("CANCEL"));
             box2.add(cancel);
             box2.add(Box.createHorizontalGlue());
             
@@ -659,7 +659,7 @@ public class HBCICallbackSwing
         
         sync.startWaiting();
         if (aborted[0])
-            throw new AbortedException(HBCIUtilsInternal.getLocMsg("EXCMSG_USR_ABORT"));
+            throw new AbortedException(HBCIUtils.getLocMsg("EXCMSG_USR_ABORT"));
     }
     
     private void needProxyData(final Hashtable<String, Object> currentData)
@@ -695,7 +695,7 @@ public class HBCICallbackSwing
 
             box2=Box.createHorizontalBox();
             mainbox.add(box2);
-            box2.add(new JLabel(HBCIUtilsInternal.getLocMsg("CALLB_NEED_PROXYDATA")));
+            box2.add(new JLabel(HBCIUtils.getLocMsg("CALLB_NEED_PROXYDATA")));
             box2.add(Box.createHorizontalGlue());
             
             mainbox.add(Box.createVerticalStrut(10));
@@ -712,13 +712,13 @@ public class HBCICallbackSwing
             AbstractPinTanPassport passport=(AbstractPinTanPassport)currentData.get("passport");
             
             constr.gridx=0;constr.gridy=0;
-            table.add(new JLabel(HBCIUtilsInternal.getLocMsg("CALLB_PROXY_USERNAME")),constr);
+            table.add(new JLabel(HBCIUtils.getLocMsg("CALLB_PROXY_USERNAME")),constr);
             final JTextField input_user=new JTextField(passport.getProxyUser(),3);
             constr.gridx++;
             table.add(input_user,constr);
 
             constr.gridx=0;constr.gridy++;
-            table.add(new JLabel(HBCIUtilsInternal.getLocMsg("CALLB_PROXY_PASSWD")),constr);
+            table.add(new JLabel(HBCIUtils.getLocMsg("CALLB_PROXY_PASSWD")),constr);
             final JPasswordField input_pass=new JPasswordField(passport.getProxyPass(),25);
             constr.gridx++;
             table.add(input_pass,constr);
@@ -732,7 +732,7 @@ public class HBCICallbackSwing
             box2.add(ok);
             ((JComponent)win).getRootPane().setDefaultButton(ok);
             
-            JButton cancel=new JButton(HBCIUtilsInternal.getLocMsg("CANCEL"));
+            JButton cancel=new JButton(HBCIUtils.getLocMsg("CANCEL"));
             box2.add(cancel);
             box2.add(Box.createHorizontalGlue());
             
@@ -755,7 +755,7 @@ public class HBCICallbackSwing
         
         sync.startWaiting();
         if (aborted[0])
-            throw new AbortedException(HBCIUtilsInternal.getLocMsg("EXCMSG_USR_ABORT"));
+            throw new AbortedException(HBCIUtils.getLocMsg("EXCMSG_USR_ABORT"));
     }
     
     private void needAction(final Hashtable<String, Object> currentData,final boolean blocking,final String winname)
@@ -798,7 +798,7 @@ public class HBCICallbackSwing
             mainbox.add(Box.createVerticalStrut(4));
             
             box2.add(Box.createHorizontalGlue());
-            JButton cancel=new JButton(HBCIUtilsInternal.getLocMsg("CLOSE"));
+            JButton cancel=new JButton(HBCIUtils.getLocMsg("CLOSE"));
             box2.add(cancel);
             box2.add(Box.createHorizontalGlue());
             
@@ -852,7 +852,7 @@ public class HBCICallbackSwing
     
                 box2=Box.createHorizontalBox();
                 mainbox.add(box2);
-                box2.add(new JLabel(HBCIUtilsInternal.getLocMsg("CALLB_NEW_INST_KEYS")));
+                box2.add(new JLabel(HBCIUtils.getLocMsg("CALLB_NEW_INST_KEYS")));
                 box2.add(Box.createHorizontalGlue());
                 
                 mainbox.add(Box.createVerticalStrut(10));
@@ -875,7 +875,7 @@ public class HBCICallbackSwing
                 Font font=new Font("Monospaced",Font.PLAIN,10);
     
                 constr.gridx=0;constr.gridy=0;constr.gridheight=8;
-                table.add(new JLabel(HBCIUtilsInternal.getLocMsg("EXPONENT")),constr);
+                table.add(new JLabel(HBCIUtils.getLocMsg("EXPONENT")),constr);
                 constr.gridx++;constr.gridheight=1;
                 for (int i=0;i<=exp_st.length()/3/16;i++) {
                     if (i==0)
@@ -892,7 +892,7 @@ public class HBCICallbackSwing
                 
                 constr.gridx=0;constr.gridheight=8;
                 constr.insets=new Insets(4,0,4,8);
-                table.add(new JLabel(HBCIUtilsInternal.getLocMsg("MODULUS")),constr);
+                table.add(new JLabel(HBCIUtils.getLocMsg("MODULUS")),constr);
                 constr.gridx++;constr.gridheight=1;
                 for (int i=0;i<=mod_st.length()/3/16;i++) {
                     if (i==0)
@@ -908,7 +908,7 @@ public class HBCICallbackSwing
                 }
                 
                 constr.gridx=0;constr.gridheight=2;
-                table.add(new JLabel(HBCIUtilsInternal.getLocMsg("HASH")),constr);
+                table.add(new JLabel(HBCIUtils.getLocMsg("HASH")),constr);
                 constr.insets=new Insets(4,0,4,8);
                 constr.gridx++;constr.gridheight=1;
                 for (int i=0;i<=hash_st.length()/3/10;i++) {
@@ -933,7 +933,7 @@ public class HBCICallbackSwing
                 box2.add(ok);
                 ((JComponent)win).getRootPane().setDefaultButton(ok);
                 
-                JButton cancel=new JButton(HBCIUtilsInternal.getLocMsg("CANCEL"));
+                JButton cancel=new JButton(HBCIUtils.getLocMsg("CANCEL"));
                 box2.add(cancel);
                 box2.add(Box.createHorizontalGlue());
                 
@@ -953,7 +953,7 @@ public class HBCICallbackSwing
                 ok.requestFocus();
                 drawWin(currentData,winname);
             } catch (Exception e) {
-                throw new HBCI_Exception(HBCIUtilsInternal.getLocMsg("EXCMSG_CALLB_ERR"),e);
+                throw new HBCI_Exception(HBCIUtils.getLocMsg("EXCMSG_CALLB_ERR"),e);
             }
         }});
         
@@ -991,7 +991,7 @@ public class HBCICallbackSwing
                 
                 box2=Box.createHorizontalBox();
                 mainbox.add(box2);
-                box2.add(new JLabel(HBCIUtilsInternal.getLocMsg("CALLB_ERROR_OCCURED")));
+                box2.add(new JLabel(HBCIUtils.getLocMsg("CALLB_ERROR_OCCURED")));
                 box2.add(Box.createHorizontalGlue());
 
                 mainbox.add(Box.createVerticalStrut(6));
@@ -1008,11 +1008,11 @@ public class HBCICallbackSwing
                 mainbox.add(Box.createVerticalStrut(4));
 
                 box2.add(Box.createHorizontalGlue());
-                JButton ok=new JButton(HBCIUtilsInternal.getLocMsg("IGNORE"));
+                JButton ok=new JButton(HBCIUtils.getLocMsg("IGNORE"));
                 box2.add(ok);
                 ((JComponent)win).getRootPane().setDefaultButton(ok);
 
-                JButton cancel=new JButton(HBCIUtilsInternal.getLocMsg("ABORT"));
+                JButton cancel=new JButton(HBCIUtils.getLocMsg("ABORT"));
                 box2.add(cancel);
                 box2.add(Box.createHorizontalGlue());
                 
@@ -1032,7 +1032,7 @@ public class HBCICallbackSwing
                 ok.requestFocus();
                 drawWin(currentData,winname);
             } catch (Exception e) {
-                throw new HBCI_Exception(HBCIUtilsInternal.getLocMsg("EXCMSG_CALLB_ERR"),e);
+                throw new HBCI_Exception(HBCIUtils.getLocMsg("EXCMSG_CALLB_ERR"),e);
             }
         }});
 
@@ -1070,7 +1070,7 @@ public class HBCICallbackSwing
 
                 box2=Box.createHorizontalBox();
                 mainbox.add(box2);
-                box2.add(new JLabel(HBCIUtilsInternal.getLocMsg("CALLB_NEW_USER_KEYS")));
+                box2.add(new JLabel(HBCIUtils.getLocMsg("CALLB_NEW_USER_KEYS")));
                 box2.add(Box.createHorizontalGlue());
                 
                 mainbox.add(Box.createVerticalStrut(10));
@@ -1094,37 +1094,37 @@ public class HBCICallbackSwing
 
                 Date date=new Date();                
                 constr.gridx=0;constr.gridy=0;
-                table.add(new JLabel(HBCIUtilsInternal.getLocMsg("DATE")),constr);
+                table.add(new JLabel(HBCIUtils.getLocMsg("DATE")),constr);
                 constr.gridx++;
                 table.add(new JLabel(HBCIUtils.date2StringLocal(date)),constr);
                 
                 constr.gridx=0;constr.gridy++;
-                table.add(new JLabel(HBCIUtilsInternal.getLocMsg("TIME")),constr);
+                table.add(new JLabel(HBCIUtils.getLocMsg("TIME")),constr);
                 constr.gridx++;
                 table.add(new JLabel(HBCIUtils.time2StringLocal(date)),constr);
                 
                 constr.gridx=0;constr.gridy++;
-                table.add(new JLabel(HBCIUtilsInternal.getLocMsg("BLZ")),constr);
+                table.add(new JLabel(HBCIUtils.getLocMsg("BLZ")),constr);
                 constr.gridx++;
                 table.add(new JLabel(passport.getBLZ()),constr);
                 
                 constr.gridx=0;constr.gridy++;
-                table.add(new JLabel(HBCIUtilsInternal.getLocMsg("USERID")),constr);
+                table.add(new JLabel(HBCIUtils.getLocMsg("USERID")),constr);
                 constr.gridx++;
                 table.add(new JLabel(passport.getUserId()),constr);
                 
                 constr.gridx=0;constr.gridy++;
-                table.add(new JLabel(HBCIUtilsInternal.getLocMsg("KEYNUM")),constr);
+                table.add(new JLabel(HBCIUtils.getLocMsg("KEYNUM")),constr);
                 constr.gridx++;
                 table.add(new JLabel(passport.getMyPublicSigKey().num),constr);
                 
                 constr.gridx=0;constr.gridy++;
-                table.add(new JLabel(HBCIUtilsInternal.getLocMsg("KEYVERSION")),constr);
+                table.add(new JLabel(HBCIUtils.getLocMsg("KEYVERSION")),constr);
                 constr.gridx++;
                 table.add(new JLabel(passport.getMyPublicSigKey().version),constr);
                 
                 constr.gridx=0;constr.gridy++;constr.gridheight=8;
-                table.add(new JLabel(HBCIUtilsInternal.getLocMsg("EXPONENT")),constr);
+                table.add(new JLabel(HBCIUtils.getLocMsg("EXPONENT")),constr);
                 constr.gridx++;constr.gridheight=1;
                 for (int i=0;i<=exp_st.length()/3/16;i++) {
                     if (i==0)
@@ -1141,7 +1141,7 @@ public class HBCICallbackSwing
                 
                 constr.gridx=0;constr.gridheight=8;
                 constr.insets=new Insets(4,0,4,8);
-                table.add(new JLabel(HBCIUtilsInternal.getLocMsg("MODULUS")),constr);
+                table.add(new JLabel(HBCIUtils.getLocMsg("MODULUS")),constr);
                 constr.gridx++;constr.gridheight=1;
                 for (int i=0;i<=mod_st.length()/3/16;i++) {
                     if (i==0)
@@ -1157,7 +1157,7 @@ public class HBCICallbackSwing
                 }
                 
                 constr.gridx=0;constr.gridheight=2;
-                table.add(new JLabel(HBCIUtilsInternal.getLocMsg("HASH")),constr);
+                table.add(new JLabel(HBCIUtils.getLocMsg("HASH")),constr);
                 constr.insets=new Insets(4,0,4,8);
                 constr.gridx++;constr.gridheight=1;
                 for (int i=0;i<=hash_st.length()/3/10;i++) {
@@ -1192,7 +1192,7 @@ public class HBCICallbackSwing
                 sync.stopWaiting();
                 drawWin(currentData,winname);
             } catch (Exception e) {
-                throw new HBCI_Exception(HBCIUtilsInternal.getLocMsg("EXCMSG_CALLB_ERR"),e);
+                throw new HBCI_Exception(HBCIUtils.getLocMsg("EXCMSG_CALLB_ERR"),e);
             }
         }});
         
@@ -1237,7 +1237,7 @@ public class HBCICallbackSwing
 
             box2=Box.createHorizontalBox();
             mainbox.add(box2);
-            JLabel label=new JLabel(HBCIUtilsInternal.getLocMsg("GUI_HAVEINSTMSG"));
+            JLabel label=new JLabel(HBCIUtils.getLocMsg("GUI_HAVEINSTMSG"));
             label.setFont(new Font("Arial",Font.PLAIN,10));
             box2.add(label);
             box2.add(Box.createHorizontalGlue());
@@ -1373,7 +1373,7 @@ public class HBCICallbackSwing
 
             final StringBuffer retData=(StringBuffer)currentData.get("retData");
             
-            String[] tableCols={"ID",HBCIUtilsInternal.getLocMsg("BLZ"),HBCIUtilsInternal.getLocMsg("USERID")};
+            String[] tableCols={"ID",HBCIUtils.getLocMsg("BLZ"),HBCIUtils.getLocMsg("USERID")};
             ArrayList<String[]> data=new ArrayList<String[]>();
             StringTokenizer tok=new StringTokenizer(retData.toString(),"|");
             while (tok.hasMoreTokens()) {
@@ -1400,7 +1400,7 @@ public class HBCICallbackSwing
             box2.add(ok);
             ((JComponent)win).getRootPane().setDefaultButton(ok);
 
-            JButton cancel=new JButton(HBCIUtilsInternal.getLocMsg("CANCEL"));
+            JButton cancel=new JButton(HBCIUtils.getLocMsg("CANCEL"));
             box2.add(cancel);
             box2.add(Box.createHorizontalGlue());
 
@@ -1421,7 +1421,7 @@ public class HBCICallbackSwing
 
         sync.startWaiting();
         if (aborted[0])
-            throw new AbortedException(HBCIUtilsInternal.getLocMsg("EXCMSG_USR_ABORT")); 
+            throw new AbortedException(HBCIUtils.getLocMsg("EXCMSG_USR_ABORT")); 
     }
 
     private void needPTSecMech(final Hashtable<String, Object> currentData,final String winname)
@@ -1492,7 +1492,7 @@ public class HBCICallbackSwing
             box2.add(ok);
             ((JComponent)win).getRootPane().setDefaultButton(ok);
 
-            JButton cancel=new JButton(HBCIUtilsInternal.getLocMsg("CANCEL"));
+            JButton cancel=new JButton(HBCIUtils.getLocMsg("CANCEL"));
             box2.add(cancel);
             box2.add(Box.createHorizontalGlue());
 
@@ -1513,7 +1513,7 @@ public class HBCICallbackSwing
 
         sync.startWaiting();
         if (aborted[0])
-            throw new AbortedException(HBCIUtilsInternal.getLocMsg("EXCMSG_USR_ABORT")); 
+            throw new AbortedException(HBCIUtils.getLocMsg("EXCMSG_USR_ABORT")); 
     }
 
     protected Container createWin(Hashtable<String, Object> currentData,String title,String winname)

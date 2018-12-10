@@ -31,10 +31,7 @@ import org.kapott.hbci.structures.Konto;
 import org.kapott.hbci.structures.Value;
 
 /** <p>Schnittstelle für alle Aufträge, die via HBCI ausgeführt werden sollen. Ein
- HBCIJob-Objekt wird nur innerhalb von <em>HBCI4Java</em> verwaltet. Durch Aufruf einer der Methoden
- {@link org.kapott.hbci.manager.HBCIHandler#newJob(String)} oder
- {@link org.kapott.hbci.manager.HBCIHandler#newLowlevelJob(String)} wird
- eine neue Instanz eines HBCIJobs erzeugt. Die konkrete Klasse dieser Instanz ist
+ HBCIJob-Objekt wird nur innerhalb von <em>HBCI4Java</em> verwaltet. Die konkrete Klasse dieser Instanz ist
  für den Anwendungsentwickler nicht von Bedeutung.</p>
  <p>Die Anwendung muss nur die für diesen Job benötigten Parameter setzen (mit 
  {@link #setParam(String,String)}). Falls dieser Job mehrere digitale

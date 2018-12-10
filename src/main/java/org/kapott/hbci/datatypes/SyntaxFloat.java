@@ -89,7 +89,7 @@ public class SyntaxFloat
             setContent(st,minsize,maxsize);
             res.delete(0,endidx);
         } catch (Exception ex) {
-            throw new InvalidUserDataException(HBCIUtilsInternal.getLocMsg("EXCMSG_FLOATERR",st),ex); 
+            throw new InvalidUserDataException(HBCIUtils.getLocMsg("EXCMSG_FLOATERR",st),ex); 
         }
     }
 

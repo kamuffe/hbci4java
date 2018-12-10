@@ -15,7 +15,11 @@ import org.junit.Test;
 import org.kapott.hbci.exceptions.ParseErrorException;
 import org.kapott.hbci.manager.HBCIKernelImpl;
 import org.kapott.hbci.manager.HBCIUtils;
+import org.kapott.hbci.manager.HBCIVersion;
+import org.kapott.hbci.manager.IHandlerData;
 import org.kapott.hbci.manager.MsgGen;
+import org.kapott.hbci.passport.HBCIPassport;
+import org.kapott.hbci.passport.HBCIPassportPinTan;
 import org.kapott.hbci.protocol.MSG;
 import org.kapott.hbci.protocol.factory.MSGFactory;
 import org.kapott.hbci4java.AbstractTest;
@@ -33,7 +37,28 @@ public class TestBug1129 extends AbstractTest
   private Hashtable<String, String> parse() throws Exception
   {
     String data = this.getFile("bugzilla-1129.txt");
-    HBCIKernelImpl kernel = new HBCIKernelImpl(null,"plus");
+    
+    IHandlerData handlerData = new IHandlerData() {
+
+		@Override
+		public HBCIPassport getPassport()
+		{
+			
+			HBCIPassportPinTan passport = new HBCIPassportPinTan(null, null);
+			passport.setHBCIVersion( HBCIVersion.HBCI_PLUS.getId() );
+			return passport;
+		}
+
+		@Override
+		public MsgGen getMsgGen()
+		{
+			// TODO Auto-generated method stub
+			return null;
+		}
+    	
+    };
+    
+    HBCIKernelImpl kernel = new HBCIKernelImpl(handlerData);
     kernel.rawNewMsg("DauerList");
     
     MsgGen gen = kernel.getMsgGen();

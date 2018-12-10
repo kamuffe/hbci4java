@@ -3,7 +3,9 @@ package org.kapott.hbci4java.sepa;
 import java.util.Properties;
 
 import org.junit.Test;
+import org.kapott.hbci.GV.GVTermUebSEPAList;
 import org.kapott.hbci.GV.HBCIJob;
+import org.kapott.hbci.manager.HBCIHandler;
 import org.kapott.hbci.passport.HBCIPassport;
 import org.kapott.hbci4java.AbstractTestGV;
 
@@ -22,8 +24,8 @@ public class TestGVTermUebSEPAList extends AbstractTestGV
     {
         this.execute(new Execution() {
             @Override
-            public String getJobname() {
-                return "TermUebSEPAList";
+            public HBCIJob getJob(HBCIHandler handler) {
+                return new GVTermUebSEPAList(handler);
             }
             
             /**

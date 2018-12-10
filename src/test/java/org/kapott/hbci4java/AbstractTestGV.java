@@ -28,6 +28,7 @@ import org.kapott.hbci.manager.HBCIUtils;
 import org.kapott.hbci.manager.HBCIVersion;
 import org.kapott.hbci.passport.AbstractHBCIPassport;
 import org.kapott.hbci.passport.HBCIPassport;
+import org.kapott.hbci.passport.HBCIPassportPinTan;
 import org.kapott.hbci.passport.HBCIPassportPinTanMemory;
 import org.kapott.hbci.status.HBCIExecStatus;
 
@@ -104,13 +105,12 @@ public abstract class AbstractTestGV
 
               
         // Initialisierungsparameter fuer HBCI4Java selbst
-        Properties props = new Properties();
-        props.put("log.loglevel.default",this.params.getProperty("log.loglevel.default",System.getProperty("log.loglevel.default",Integer.toString(HBCIUtils.LOG_DEBUG))));
-        props.put("client.passport.PinTan.init","1");
-        props.put("client.passport.PinTan.checkcert",this.params.getProperty("client.passport.PinTan.checkcert","1"));
-        props.put("client.passport.PinTan.proxy",    this.params.getProperty("client.passport.PinTan.proxy",""));
-        props.put("client.passport.PinTan.proxyuser",this.params.getProperty("client.passport.PinTan.proxyuser",""));
-        props.put("client.passport.PinTan.proxypass",this.params.getProperty("client.passport.PinTan.proxypass",""));
+//        Properties props = new Properties();
+//        props.put("client.passport.PinTan.init","1");
+//        props.put("client.passport.PinTan.checkcert",this.params.getProperty("client.passport.PinTan.checkcert","1"));
+//        props.put("client.passport.PinTan.proxy",    this.params.getProperty("client.passport.PinTan.proxy",""));
+//        props.put("client.passport.PinTan.proxyuser",this.params.getProperty("client.passport.PinTan.proxyuser",""));
+//        props.put("client.passport.PinTan.proxypass",this.params.getProperty("client.passport.PinTan.proxypass",""));
       
         // Callback initialisieren.
         // Wenn wir passende Antworten in den Presets haben, koennen wir sie direkt
@@ -167,10 +167,10 @@ public abstract class AbstractTestGV
         //
         ////////////////////////////////////////////////////////////////////////
 
-        this.passport = (HBCIPassportPinTanMemory) AbstractHBCIPassport.getInstance("PinTan", callback, "PinTanMemory");
+        this.passport = (HBCIPassportPinTanMemory) AbstractHBCIPassport.getInstance(HBCIPassportPinTan.class, callback, "PinTanMemory");
       
         // init handler
-        this.handler = new HBCIHandler(this.params.getProperty("hbciversion",HBCIVersion.HBCI_300.getId()),this.passport);
+        this.handler = new HBCIHandler(this.passport);
     }
     
     /**
@@ -179,7 +179,7 @@ public abstract class AbstractTestGV
      */
     protected final void execute(Execution e)
     {
-        HBCIJob job = this.handler.newJob(e.getJobname());
+        HBCIJob job = e.getJob(this.handler);
         e.configure(job,this.passport,this.params);
         
         job.addToQueue();
@@ -229,9 +229,10 @@ public abstract class AbstractTestGV
          * Die Basis-Implementierung liefert den Parameter "job" des Test.
          * @return der Name des auszufuehrenden Geschaeftsvorfalls.
          */
-        public String getJobname()
+        public HBCIJob getJob(HBCIHandler handler)
         {
-            return params.getProperty("job");
+//            return params.getProperty("job");
+        	return null;
         }
         
         /**

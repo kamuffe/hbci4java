@@ -7,7 +7,11 @@ import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.kapott.hbci.manager.HBCIKernelImpl;
+import org.kapott.hbci.manager.HBCIVersion;
+import org.kapott.hbci.manager.IHandlerData;
 import org.kapott.hbci.manager.MsgGen;
+import org.kapott.hbci.passport.HBCIPassport;
+import org.kapott.hbci.passport.HBCIPassportPinTan;
 import org.kapott.hbci.protocol.MSG;
 import org.kapott.hbci.protocol.MultipleSyntaxElements;
 import org.kapott.hbci.protocol.factory.MSGFactory;
@@ -39,7 +43,26 @@ public class TestMultipleDEGs extends AbstractTest
   {
 
     String data = getFile("TestMultipleDEGs-01.txt");
-    HBCIKernelImpl kernel = new HBCIKernelImpl(null, "300");
+    
+    IHandlerData handlerData = new IHandlerData() {
+
+		@Override
+		public HBCIPassport getPassport()
+		{
+			
+			HBCIPassportPinTan passport = new HBCIPassportPinTan(null, null);
+			return passport;
+		}
+
+		@Override
+		public MsgGen getMsgGen()
+		{
+			// TODO Auto-generated method stub
+			return null;
+		}
+    	
+    };
+    HBCIKernelImpl kernel = new HBCIKernelImpl(handlerData);
 
     kernel.rawNewMsg("DialogInit");
 

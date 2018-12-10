@@ -3,7 +3,9 @@ package org.kapott.hbci4java.sepa;
 import java.util.Properties;
 
 import org.junit.Test;
+import org.kapott.hbci.GV.GVTermUebSEPA;
 import org.kapott.hbci.GV.HBCIJob;
+import org.kapott.hbci.manager.HBCIHandler;
 import org.kapott.hbci.passport.HBCIPassport;
 import org.kapott.hbci.structures.Konto;
 import org.kapott.hbci.structures.Value;
@@ -24,8 +26,8 @@ public class TestGVTermUebSEPA extends AbstractTestGV
     {
         this.execute(new Execution() {
             @Override
-            public String getJobname() {
-                return "TermUebSEPA";
+            public HBCIJob getJob(HBCIHandler handler) {
+                return new GVTermUebSEPA(handler);
             }
             
             /**
@@ -43,7 +45,7 @@ public class TestGVTermUebSEPA extends AbstractTestGV
                 job.setParam("dst",acc);
                 
                 int idx = Integer.parseInt(params.getProperty("passport_index","0"));
-                job.setParam("src",passport.getAccounts()[idx]);
+                job.setParam("src",passport.getAccounts().get( idx ) );
                 
                 String value = params.getProperty("value","1");
                 job.setParam("btg",new Value(Integer.parseInt(value),"EUR"));

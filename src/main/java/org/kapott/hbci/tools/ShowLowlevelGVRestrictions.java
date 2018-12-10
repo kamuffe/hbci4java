@@ -51,7 +51,7 @@ public class ShowLowlevelGVRestrictions
                     .readLine();
         }
 
-        HBCIKernelImpl kernel = new HBCIKernelImpl(null, hbciversion);
+        HBCIKernelImpl kernel = new HBCIKernelImpl(null);
         MsgGen         msggen = kernel.getMsgGen();
         Document       syntax = msggen.getSyntax();
 

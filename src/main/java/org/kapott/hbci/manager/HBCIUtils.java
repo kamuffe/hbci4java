@@ -1,18 +1,14 @@
 
 /*
  * $Id: HBCIUtils.java,v 1.2 2011/11/24 21:59:37 willuhn Exp $
- *
  * This file is part of HBCI4Java Copyright (C) 2001-2008 Stefan Palme
- *
  * HBCI4Java is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation; either version 2 of the License, or (at your option) any later
  * version.
- *
  * HBCI4Java is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
  * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
  * You should have received a copy of the GNU General Public License along with
  * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
  * Place, Suite 330, Boston, MA 02111-1307 USA
@@ -32,6 +28,7 @@ import java.security.Security;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -43,6 +40,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.MissingResourceException;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.ResourceBundle;
@@ -55,8 +53,11 @@ import org.kapott.hbci.exceptions.HBCI_Exception;
 import org.kapott.hbci.exceptions.InvalidArgumentException;
 import org.kapott.hbci.exceptions.InvalidUserDataException;
 import org.kapott.hbci.passport.HBCIPassport;
+import org.kapott.hbci.security.Sig;
 import org.kapott.hbci.structures.Konto;
 import org.kapott.hbci.swift.Swift;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>
@@ -244,69 +245,6 @@ import org.kapott.hbci.swift.Swift;
  * HBCI-Zugangsdaten abgelegt.
  * </p>
  * </li>
- * <li><code>client.passport.PinTan.certfile</code> (für PIN/TAN-Passports)
- * <p>
- * Dieser Parameter gibt den Dateinamen einer Datei an, die ein Zertifikat für
- * die Kommunikation via HTTPS (SSL-Verschlüsselung) enthält. Diese Datei kann
- * mit dem Tool <code>keytool</code> erzeugt werden, welches zur
- * Java-Laufzeitumgebung gehört. Das Zertifikat (ein bestätigter öffentlicher
- * Schlüssel) kann i.d.R. von der Bank angefordert werden.
- * </p>
- * <p>
- * Dieser Parameter wird nur dann benötigt, wenn das SSL-Zertifikat der Bank
- * nicht mit dem defaultmäßig in die JRE eingebauten TrustStore überprüft werden
- * kann (also am besten erst ohne diesen Parameter ausprobieren - wenn eine
- * entsprechende Fehlermeldung erscheint, muss das jeweilige Zertifikat von der
- * Bank angefordert, mit <code>keytool</code> konvertiert und hier angegeben
- * werden). Wenn ein entsprechendes Root-Zertifikat für die Überprüfung gar
- * nicht zur Verfügung steht, so kann mit dem Parameter
- * <code>client.passport.PinTan.checkcert</code> die Zertifikatsüberprüfung
- * gänzlich deaktiviert werden.
- * </p>
- * </li>
- * <li><code>client.passport.PinTan.checkcert</code> (für PIN/TAN-Passports)
- * <p>
- * Dieser Parameter steht defaultmäßig auf "<code>1</code>". Wird dieser
- * Parameter allerdings auf "<code>0</code>" gesetzt, so wird die Überprüfung
- * des Bank-Zertifikates, welches für die SSL-Kommunikation verwendet wird,
- * deaktiviert. Diese Vorgehensweise wird nicht empfohlen, da dann Angriffe auf
- * das SSL-Protokoll und damit auch auf die HBCI-Kommunikation möglich sind. In
- * einigen Fällen steht aber kein Root-Zertifikat für die Überprüfung des
- * SSL-Zertifikats der Bank zur Verfügung, so dass diese Überprüfung
- * abgeschaltet werden <em>muss</em>, um überhaupt eine Kommunikation mit der
- * Bank zu ermöglichen.
- * </p>
- * </li>
- * <li><code>client.passport.PinTan.proxy</code> (für PIN/TAN-Passports)
- * <p>
- * Falls ausgehende HTTPS-Verbindungen über einen Proxy-Server laufen sollen,
- * kann der zu verwendende Proxy-Server mit diesem Parameter konfiguriert
- * werden. Das Format für den Wert dieses Kernel-Parameters ist "HOST:PORT",
- * also z.B. <code>proxy.intern.domain.com:3128</code>.
- * </p>
- * </li>
- * <li><code>client.passport.PinTan.proxyuser</code> (für PIN/TAN-Passports)
- * <p>
- * Falls für ausgehende HTTPS-Verbindungen (für HBCI-PIN/TAN) ein Proxy-Server
- * verwendet wird, und falls dieser Proxy-Server eine Authentifizierung
- * verlangt, kann mit diesem Parameter der Nutzername festgelegt werden.
- * </p>
- * <p>
- * Wenn dieser Parameter nicht gesetzt wird, wird bei Bedarf über einen Callback
- * (<code>NEED_PROXY_USER</code>) nach dem Nutzernamen gefragt.
- * </p>
- * </li>
- * <li><code>client.passport.PinTan.proxypass</code> (für PIN/TAN-Passports)
- * <p>
- * Falls für ausgehende HTTPS-Verbindungen (für HBCI-PIN/TAN) ein Proxy-Server
- * verwendet wird, und falls dieser Proxy-Server eine Authentifizierung
- * verlangt, kann mit diesem Parameter das Passwort festgelegt werden.
- * </p>
- * <p>
- * Wenn dieser Parameter nicht gesetzt wird, wird bei Bedarf über einen Callback
- * (<code>NEED_PROXY_PASS</code>) nach dem Passwort gefragt.
- * </p>
- * </li>
  * <li><code>client.passport.PinTan.init</code> (für PIN/TAN-Passports)
  * <p>
  * Dieser Parameter ist immer auf "1" zu setzen (wird nur intern anders
@@ -381,13 +319,6 @@ import org.kapott.hbci.swift.Swift;
  * oder "<code>Anonymous</code>" (Groß-/Kleinschreibung beachten).
  * </p>
  * </li>
- * <li><code>client.retries.passphrase</code>
- * <p>
- * Ist das Passwort für die Entschlüsselung der Passport-Datei falsch, so kann
- * die Eingabe so oft wiederholt werden, wie dieser Parameter angibt, bevor eine
- * Exception geworfen und die weitere Programmausführung unterbrochen wird.
- * </p>
- * </li>
  * <li><code>client.connection.localPort</code>
  * <p>
  * Für Anwendungen, die sich hinter einer Firewall befinden, welche nur
@@ -424,11 +355,6 @@ import org.kapott.hbci.swift.Swift;
  * abrufen. Der Default-Wet ist 7 - also einmal pro Woche.
  * </p>
  * </li>
- * <li><code>kernel.kernel.xmlpath</code>
- * <p>
- * (wird nicht gesetzt, zur Zeit nur intern benutzt)
- * </p>
- * </li>
  * <li><code>kernel.kernel.blzpath</code>
  * <p>
  * (wird nicht gesetzt, zur Zeit nur intern benutzt)
@@ -437,19 +363,6 @@ import org.kapott.hbci.swift.Swift;
  * <li><code>kernel.kernel.challengedatapath</code>
  * <p>
  * (wird nicht gesetzt, zur Zeit nur intern benutzt)
- * </p>
- * </li>
- * <li><code>log.loglevel.default</code>
- * <p>
- * Mit diesem Parameter kann eingestellt werden, welche vom HBCI-Kernel
- * erzeugten Log-Ausgaben tatsächlich bis zur Anwendung gelangen. Dieser
- * Parameter kann Werte von 1 (nur Fehlermeldungen) bis 5 (einschließlich aller
- * Debug-Ausgaben) annehmen.
- * </p>
- * <p>
- * Bei Problemen mit dem Kernel diesen Level bitte auf 4 oder 5 setzen, alle
- * erzeugten Log-Ausgaben protokollieren und zusammen mit einer Beschreibung des
- * Problems an den <a href="mailto:hbci4java@kapott.org">Autor</a> schicken.
  * </p>
  * </li>
  * <li><code>log.filter</code>
@@ -679,63 +592,53 @@ import org.kapott.hbci.swift.Swift;
  */
 public final class HBCIUtils
 {
-  /**
-   * Die offizielle HBCI-Produktregistrierung von HBCI4Java - siehe http://hbci-zka.de/register/register_faq.htm
-   */
-  public final static String PRODUCT_ID = "36792786FA12F235F04647689";
-  
-  private final static String VERSION = HBCIUtils.class.getPackage().getImplementationVersion();
-  
-  /** Loglevel für keine Ausgaben */
-	public static final int								LOG_NONE	= 0;
-	/** Loglevel für Fehlerausgaben */
-	public static final int								LOG_ERR		= 1;
-	/** Loglevel für Warnungen */
-	public static final int								LOG_WARN	= 2;
-	/** Loglevel für Informationen */
-	public static final int								LOG_INFO	= 3;
-	/** Loglevel für Debug-Ausgaben */
-	public static final int								LOG_DEBUG	= 4;
-	/** Loglevel für Debug-Ausgaben für extreme-Debugging */
-	public static final int								LOG_DEBUG2	= 5;
-	/** Loglevel für devel-Debugging - nicht benutzen! */
-	public static final int								LOG_INTERN	= 6;
+	/**
+	 * The {@link Logger} to be used.
+	 */
+	private static final Logger logger = LoggerFactory.getLogger( HBCIUtils.class );
 
-	private static Properties	config = new Properties();	
+	/**
+	 * Die offizielle HBCI-Produktregistrierung von HBCI4Java - siehe http://hbci-zka.de/register/register_faq.htm
+	 */
+	public static final String PRODUCT_ID = "36792786FA12F235F04647689";
+
+	private static final String VERSION = HBCIUtils.class.getPackage().getImplementationVersion();
+
+
+	private static Properties config = new Properties();
 	private static Properties blzs = new Properties();
-	private static Map<String,BankInfo> banks = new HashMap<>();
-	private static Locale  locale;
-	
-	private static char[]								base64table	= { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q',
+	private static Map<String, BankInfo> banks = new HashMap<>();
+	private static Locale locale;
+	public static ResourceBundle locMsgs;
+
+	private static char[] base64table = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q',
 			'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
 			'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/' };
 	static
 	{
 		init( new Properties() );
 
-		if ( Security.getProvider( "CryptAlgs4Java" ) == null )
-		{
-			Security.addProvider( new CryptAlgs4JavaProvider() );
-		}
 	}
 
 	private HBCIUtils()
 	{
 	}
 
-    /**
-     * Liefert das Pruefziffern-Verfahren fuer diese Bank.
-     * @param blz die BLZ.
-     * @return das Pruefziffern-Verfahren fuer diese Bank.
-     */
-    public static String getAlgForBLZ(String blz)
-    {
-        BankInfo info = banks.get(blz);
-        if (info == null)
-            return "";
-        return info.getChecksumMethod() != null ? info.getChecksumMethod() : "";
-    }
-    
+	/**
+	 * Liefert das Pruefziffern-Verfahren fuer diese Bank.
+	 * 
+	 * @param blz
+	 *        die BLZ.
+	 * @return das Pruefziffern-Verfahren fuer diese Bank.
+	 */
+	public static String getAlgForBLZ( String blz )
+	{
+		BankInfo info = banks.get( blz );
+		if ( info == null )
+			return "";
+		return info.getChecksumMethod() != null ? info.getChecksumMethod() : "";
+	}
+
 //	/**
 //	 * Lädt ein Properties-File, welches über ClassLoader.getRessourceAsStream()
 //	 * gefunden wird. Der Name des Property-Files wird durch den Parameter
@@ -835,13 +738,13 @@ public final class HBCIUtils
 	 * </p>
 	 *
 	 * @param props
-	 *            <code>Properties</code>-Objekt mit Initialisierungs-Werten für
-	 *            die Kernel-Parameter. Darf <code>null</code> sein.
+	 *        <code>Properties</code>-Objekt mit Initialisierungs-Werten für
+	 *        die Kernel-Parameter. Darf <code>null</code> sein.
 	 * @param callback
-	 *            das zu verwendende Callback-Objekt. Beim Aufruf dieser Methode
-	 *            darf <code>callback</code> niemals <code>null</code> sein (im
-	 *            Gegensatz zum Aufruf von <code>initThread</code>, um weitere
-	 *            <code>ThreadGroups</code> zu initialisieren).
+	 *        das zu verwendende Callback-Objekt. Beim Aufruf dieser Methode
+	 *        darf <code>callback</code> niemals <code>null</code> sein (im
+	 *        Gegensatz zum Aufruf von <code>initThread</code>, um weitere
+	 *        <code>ThreadGroups</code> zu initialisieren).
 	 */
 	private static synchronized void init( Properties props )
 	{
@@ -864,7 +767,6 @@ public final class HBCIUtils
 			setParam( "kernel.rewriter",
 					"InvalidSegment,WrongStatusSegOrder,WrongSequenceNumbers,MissingMsgRef,HBCIVersion,SigIdLeadingZero,InvalidSuppHBCIVersion,SecTypeTAN,KUmsDelimiters,KUmsEmptyBDateSets" );
 
-			setParam( "log.loglevel.default", "4" );
 
 		}
 		catch ( Exception e )
@@ -872,37 +774,6 @@ public final class HBCIUtils
 			throw new HBCI_Exception( "*** error while initializing HBCI4Java", e );
 		}
 	}
-
-//	/**
-//	 * Aufräumen der Datenstrukturen für aktuelle <code>ThreadGroup</code>. Alle
-//	 * <code>ThreadGroups</code>, die via
-//	 * {@link #initThread(Properties,HBCICallback)} initialisiert wurden,
-//	 * sollten kurz vor deren Ende mit dieser Methode wieder "aufgeräumt"
-//	 * werden, damit <em>HBCI4Java</em> die entsprechenden Datenstrukturen für
-//	 * diese <code>ThreadGroup</code> wieder freigeben kann.
-//	 */
-//	public static synchronized void doneThread ( )
-//	{
-//		HBCIUtils.log("removing all data for current thread", HBCIUtils.LOG_DEBUG);
-//
-//		ThreadGroup group = Thread.currentThread().getThreadGroup();
-////		HBCIUtilsInternal.callbacks.remove(group);
-//		configs.remove(group);
-//		HBCIUtilsInternal.locMsgs.remove(group);
-//		HBCIUtilsInternal.locales.remove(group);
-//	}
-//
-//	/**
-//	 * Bereinigen aller <em>HBCI4Java</em>-Datenstrukturen. Nach Aufruf dieser
-//	 * Methode kann keine andere <em>HBCI4Java</em>-Funktion mehr benutzt
-//	 * werden. Durch erneuten Aufruf von {@link #init(Properties,HBCICallback)}
-//	 * kann <em>HBCI4Java</em> wieder re-initialisiert werden.
-//	 */
-//	public static synchronized void done ( )
-//	{
-//		HBCIUtils.log("destroying all HBCI4Java resources", HBCIUtils.LOG_DEBUG);
-//		initDataStructures();
-//	}
 
 	/**
 	 * Aktualisieren der von <em>HBCI4Java</em> verwendeten Locale innerhalb der
@@ -916,28 +787,28 @@ public final class HBCIUtils
 	 * wenn die Kernel-Parameter <code>kernel.locale.*</code> <em>nach</em> dem
 	 * Initialisieren des aktuellen Threads geändert werden.
 	 */
-	private static void initLocale ( )
+	private static void initLocale()
 	{
-		String localeLang = getParam("kernel.locale.language", "");
-		String localeCountry = getParam("kernel.locale.country", "");
-		String localeVariant = getParam("kernel.locale.variant", "");
+		String localeLang = getParam( "kernel.locale.language", "" );
+		String localeCountry = getParam( "kernel.locale.country", "" );
+		String localeVariant = getParam( "kernel.locale.variant", "" );
 		Locale locale;
 
-		if (localeLang.trim().length() == 0)
+		if ( localeLang.trim().length() == 0 )
 		{
 			locale = Locale.getDefault();
-			log("using default system locale " + locale.toString(), HBCIUtils.LOG_DEBUG);
+			logger.debug( "using default system locale {}", locale );
 
 		}
 		else
 		{
-			locale = new Locale(localeLang.trim(), localeCountry.trim(), localeVariant.trim());
-			log("using specified locale " + locale.toString(), HBCIUtils.LOG_DEBUG);
+			locale = new Locale( localeLang.trim(), localeCountry.trim(), localeVariant.trim() );
+			logger.debug( "using specified locale {}", locale );
 		}
 
-		HBCIUtils.locale = locale; 
-		HBCIUtilsInternal.locMsgs = ResourceBundle.getBundle("hbci4java-messages", locale);
-		
+		HBCIUtils.locale = locale;
+		HBCIUtils.locMsgs = ResourceBundle.getBundle( "hbci4java-messages", locale );
+
 	}
 
 	/**
@@ -945,25 +816,34 @@ public final class HBCIUtils
 	 * aktuellen ThreadGroup verwendet wird. Siehe auch Kernel-Parameter
 	 * <code>kernel.locale.*</code> sowie {@link #initLocale()}.
 	 */
-	public static Locale getLocale ( )
+	public static Locale getLocale()
 	{
 		return HBCIUtils.locale;
 	}
-
-	/**
-	 * Gibt den aktuellen Wert eines bestimmten HBCI-Parameters zurück. Für jede
-	 * {@link java.lang.ThreadGroup} wird ein separater Satz von HBCI-Parametern
-	 * verwaltet.
-	 *
-	 * @param st
-	 *            Name des HBCI-Parameters
-	 * @param def
-	 *            default-Wert, falls dieser Parameter nicht definiert ist
-	 * @return den Wert des angegebenen HBCI-Parameters
-	 */
-	public static String getParam ( String st, String def )
+	
+	public static String getLocMsg( String key )
 	{
-		return config.getProperty(st, def);
+
+		try
+		{
+			return locMsgs.getString( key );
+		}
+		catch ( MissingResourceException re )
+		{
+			// tolerieren wir
+			logger.error( "An error occurred.", re );
+			return key;
+		}
+	}
+
+	public static String getLocMsg( String key, Object o )
+	{
+		return HBCIUtils.getLocMsg( key, new Object[] { o } );
+	}
+
+	public static String getLocMsg( String key, Object[] o )
+	{
+		return MessageFormat.format( getLocMsg( key ), o );
 	}
 
 	/**
@@ -972,27 +852,43 @@ public final class HBCIUtils
 	 * verwaltet.
 	 *
 	 * @param st
-	 *            Name des HBCI-Parameters
+	 *        Name des HBCI-Parameters
+	 * @param def
+	 *        default-Wert, falls dieser Parameter nicht definiert ist
 	 * @return den Wert des angegebenen HBCI-Parameters
 	 */
-	public static String getParam ( String st )
+	public static String getParam( String st, String def )
 	{
-		return getParam(st, null);
+		return config.getProperty( st, def );
+	}
+
+	/**
+	 * Gibt den aktuellen Wert eines bestimmten HBCI-Parameters zurück. Für jede
+	 * {@link java.lang.ThreadGroup} wird ein separater Satz von HBCI-Parametern
+	 * verwaltet.
+	 *
+	 * @param st
+	 *        Name des HBCI-Parameters
+	 * @return den Wert des angegebenen HBCI-Parameters
+	 */
+	public static String getParam( String st )
+	{
+		return getParam( st, null );
 	}
 
 	/**
 	 * Ermittelt zu einer gegebenen Bankleitzahl den Namen des Institutes.
 	 *
 	 * @param blz
-	 *            die Bankleitzahl
+	 *        die Bankleitzahl
 	 * @return den Namen des dazugehörigen Kreditinstitutes. Falls die
 	 *         Bankleitzahl unbekannt ist, so wird ein leerer String
 	 *         zurückgegeben
 	 */
-	public static String getNameForBLZ ( String blz )
+	public static String getNameForBLZ( String blz )
 	{
-		BankInfo info = getBankInfo(blz);
-		if (info == null)
+		BankInfo info = getBankInfo( blz );
+		if ( info == null )
 		{
 			return "";
 		}
@@ -1003,13 +899,13 @@ public final class HBCIUtils
 	 * Liefert die Bank-Informationen zur angegebenen BLZ.
 	 *
 	 * @param blz
-	 *            die BLZ.
+	 *        die BLZ.
 	 * @return die Bank-Informationen oder NULL, wenn zu der BLZ keine
 	 *         Informationen bekannt sind.
 	 */
-	public static BankInfo getBankInfo ( String blz )
+	public static BankInfo getBankInfo( String blz )
 	{
-		return banks.get(blz);
+		return banks.get( blz );
 	}
 
 	/**
@@ -1017,30 +913,30 @@ public final class HBCIUtils
 	 * Suchbegriff passen.
 	 *
 	 * @param query
-	 *            der Suchbegriff. Der Suchbegriff muss mindestens 3 Zeichen
-	 *            enthalten und ist nicht case-sensitive. Der Suchbegriff kann
-	 *            im Ort der Bank oder in deren Namen enthalten sein. Oder die
-	 *            BLZ oder BIC beginnt mit diesem Text.
+	 *        der Suchbegriff. Der Suchbegriff muss mindestens 3 Zeichen
+	 *        enthalten und ist nicht case-sensitive. Der Suchbegriff kann
+	 *        im Ort der Bank oder in deren Namen enthalten sein. Oder die
+	 *        BLZ oder BIC beginnt mit diesem Text.
 	 * @return die Liste der Bank-Informationen. Die Ergebnis-Liste ist nach BLZ
 	 *         sortiert. Die Funktion liefert niemals NULL sondern hoechstens
 	 *         eine leere Liste.
 	 */
-	public static List<BankInfo> searchBankInfo ( String query )
+	public static List<BankInfo> searchBankInfo( String query )
 	{
-		if (query != null)
+		if ( query != null )
 		{
 			query = query.trim();
 		}
 
-		List<BankInfo> list = new LinkedList<BankInfo>();
-		if (query == null || query.length() < 3)
+		List<BankInfo> list = new LinkedList<>();
+		if ( query == null || query.length() < 3 )
 		{
 			return list;
 		}
 
 		query = query.toLowerCase();
 
-		for (BankInfo info : banks.values())
+		for ( BankInfo info : banks.values() )
 		{
 			String blz = info.getBlz();
 			String bic = info.getBic();
@@ -1048,86 +944,66 @@ public final class HBCIUtils
 			String loc = info.getLocation();
 
 			// Anhand der BLZ?
-			if (blz != null && blz.startsWith(query))
+			if ( blz != null && blz.startsWith( query ) )
 			{
-				list.add(info);
+				list.add( info );
 				continue;
 			}
 
 			// Anhand der BIC?
-			if (bic != null && bic.toLowerCase().startsWith(query))
+			if ( bic != null && bic.toLowerCase().startsWith( query ) )
 			{
-				list.add(info);
+				list.add( info );
 				continue;
 			}
 
 			// Anhand des Namens?
-			if (name != null && name.toLowerCase().contains(query))
+			if ( name != null && name.toLowerCase().contains( query ) )
 			{
-				list.add(info);
+				list.add( info );
 				continue;
 			}
 			// Anhand des Orts?
-			if (loc != null && loc.toLowerCase().contains(query))
+			if ( loc != null && loc.toLowerCase().contains( query ) )
 			{
-				list.add(info);
+				list.add( info );
 				continue;
 			}
 		}
 
-		Collections.sort(list, new Comparator<BankInfo>()
+		Collections.sort( list, new Comparator<BankInfo>()
 		{
 			/**
 			 * @see java.util.Comparator#compare(java.lang.Object,
 			 *      java.lang.Object)
 			 */
 			@Override
-			public int compare ( BankInfo o1, BankInfo o2 )
+			public int compare( BankInfo o1, BankInfo o2 )
 			{
-				if (o1 == null || o1.getBlz() == null)
+				if ( o1 == null || o1.getBlz() == null )
 				{
 					return -1;
 				}
-				if (o2 == null || o2.getBlz() == null)
+				if ( o2 == null || o2.getBlz() == null )
 				{
 					return 1;
 				}
 
-				return o1.getBlz().compareTo(o2.getBlz());
+				return o1.getBlz().compareTo( o2.getBlz() );
 			}
-		});
+		} );
 
 		return list;
-	}
-
-	/**
-	 * Gibt zu einer gegebenen Bankleitzahl den BIC-Code zurück.
-	 *
-	 * @param blz
-	 *            Bankleitzahl der Bank
-	 * @return BIC-Code dieser Bank. Falls kein BIC-Code bekannt ist, wird ein
-	 *         leerer String zurückgegeben.
-	 * @deprecated Bitte {@link HBCIUtils#getBankInfo(String)} verwenden.
-	 */
-	@Deprecated
-	public static String getBICForBLZ ( String blz )
-	{
-		BankInfo info = getBankInfo(blz);
-		if (info == null)
-		{
-			return "";
-		}
-		return info.getBic() != null ? info.getBic() : "";
 	}
 
 	/**
 	 * Berechnet die IBAN fuer ein angegebenes deutsches Konto.
 	 *
 	 * @param k
-	 *            das Konto.
+	 *        das Konto.
 	 * @return die berechnete IBAN.
 	 */
-	public static String getIBANForKonto ( Konto k )
+	public static String getIBANForKonto( Konto k )
 	{
 		String konto = k.number;
 
@@ -1137,7 +1013,7 @@ public final class HBCIUtils
 		// weil damit nicht gerechnet werden kann
 		// Wir machen das auch nur dann, wenn beide Nummern zusammen max.
 		// 10 Zeichen ergeben
-		if (k.subnumber != null && k.subnumber.length() > 0 && k.subnumber.matches("[0-9]{1,8}") && k.number.length() + k.subnumber.length() <= 10)
+		if ( k.subnumber != null && k.subnumber.length() > 0 && k.subnumber.matches( "[0-9]{1,8}" ) && k.number.length() + k.subnumber.length() <= 10 )
 		{
 			konto += k.subnumber;
 		}
@@ -1146,41 +1022,41 @@ public final class HBCIUtils
 		// Pruefziffer berechnen
 		// Siehe http://www.iban.de/iban-pruefsumme.html
 		String zeros = "0000000000";
-		String filledKonto = zeros.substring(0, 10 - konto.length()) + konto; // 10-stellig
+		String filledKonto = zeros.substring( 0, 10 - konto.length() ) + konto; // 10-stellig
 																				// mit
 																				// Nullen
 																				// fuellen
-		StringBuffer sb = new StringBuffer();
-		sb.append(k.blz);
-		sb.append(filledKonto);
-		sb.append("1314"); // hartcodiert fuer "DE
-		sb.append("00"); // fest vorgegeben
+		StringBuilder sb = new StringBuilder();
+		sb.append( k.blz );
+		sb.append( filledKonto );
+		sb.append( "1314" ); // hartcodiert fuer "DE
+		sb.append( "00" ); // fest vorgegeben
 
-		BigInteger mod = new BigInteger(sb.toString()).mod(new BigInteger("97")); // "97"
-																					// ist
-																					// fest
-																					// vorgegeben
-																					// in
-																					// ISO
-																					// 7064/Modulo
-																					// 97-10
-		String checksum = String.valueOf(98 - mod.intValue()); // "98" ist fest
-																// vorgegeben in
-																// ISO
-																// 7064/Modulo
-																// 97-10
-		if (checksum.length() < 2)
+		BigInteger mod = new BigInteger( sb.toString() ).mod( BigInteger.valueOf( 97 ) ); // "97"
+																						// ist
+																						// fest
+																						// vorgegeben
+																						// in
+																						// ISO
+																						// 7064/Modulo
+																						// 97-10
+		String checksum = String.valueOf( 98 - mod.intValue() ); // "98" ist fest
+																	// vorgegeben in
+																	// ISO
+																	// 7064/Modulo
+																	// 97-10
+		if ( checksum.length() < 2 )
 		{
 			checksum = "0" + checksum;
 			//
 			/////////////////
 		}
 
-		StringBuffer result = new StringBuffer();
-		result.append("DE");
-		result.append(checksum);
-		result.append(k.blz);
-		result.append(filledKonto);
+		StringBuilder result = new StringBuilder();
+		result.append( "DE" );
+		result.append( checksum );
+		result.append( k.blz );
+		result.append( filledKonto );
 
 		return result.toString();
 	}
@@ -1190,16 +1066,16 @@ public final class HBCIUtils
 	 * zurück.
 	 *
 	 * @param blz
-	 *            Bankleitzahl der Bank
+	 *        Bankleitzahl der Bank
 	 * @return HBCI-Host (DNS-Name oder IP-Adresse). Falls kein Host bekannt
 	 *         ist, wird ein leerer String zurückgegeben.
 	 * @deprecated Bitte {@link HBCIUtils#getBankInfo(String)} verwenden.
 	 */
 	@Deprecated
-	public static String getHBCIHostForBLZ ( String blz )
+	public static String getHBCIHostForBLZ( String blz )
 	{
-		BankInfo info = getBankInfo(blz);
-		if (info == null)
+		BankInfo info = getBankInfo( blz );
+		if ( info == null )
 		{
 			return "";
 		}
@@ -1210,16 +1086,16 @@ public final class HBCIUtils
 	 * Gibt zu einer gegebenen Bankleitzahl die PIN/TAN-URL zurück.
 	 *
 	 * @param blz
-	 *            Bankleitzahl der Bank
+	 *        Bankleitzahl der Bank
 	 * @return PIN/TAN-URL. Falls keine URL bekannt ist, wird ein leerer String
 	 *         zurückgegeben.
 	 * @deprecated Bitte {@link HBCIUtils#getBankInfo(String)} verwenden.
 	 */
 	@Deprecated
-	public static String getPinTanURLForBLZ ( String blz )
+	public static String getPinTanURLForBLZ( String blz )
 	{
-		BankInfo info = getBankInfo(blz);
-		if (info == null)
+		BankInfo info = getBankInfo( blz );
+		if ( info == null )
 		{
 			return "";
 		}
@@ -1236,10 +1112,10 @@ public final class HBCIUtils
 	 * @deprecated Bitte {@link HBCIUtils#getBankInfo(String)} verwenden.
 	 */
 	@Deprecated
-	public static String getHBCIVersionForBLZ ( String blz )
+	public static String getHBCIVersionForBLZ( String blz )
 	{
-		BankInfo info = getBankInfo(blz);
-		if (info == null)
+		BankInfo info = getBankInfo( blz );
+		if ( info == null )
 		{
 			return "";
 		}
@@ -1256,10 +1132,10 @@ public final class HBCIUtils
 	 * @deprecated Bitte {@link HBCIUtils#getBankInfo(String)} verwenden.
 	 */
 	@Deprecated
-	public static String getPinTanVersionForBLZ ( String blz )
+	public static String getPinTanVersionForBLZ( String blz )
 	{
-		BankInfo info = getBankInfo(blz);
-		if (info == null)
+		BankInfo info = getBankInfo( blz );
+		if ( info == null )
 		{
 			return "";
 		}
@@ -1274,89 +1150,37 @@ public final class HBCIUtils
 	 * von HBCI-Parametern verwaltet.
 	 *
 	 * @param key
-	 *            Name des HBCI-Parameters.
+	 *        Name des HBCI-Parameters.
 	 * @param value
-	 *            neuer Wert des zu setzenden HBCI-Parameters
+	 *        neuer Wert des zu setzenden HBCI-Parameters
 	 */
-	public static void setParam ( String key, String value )
+	public static void setParam( String key, String value )
 	{
 
-		synchronized (config)
+		synchronized ( config )
 		{
-			if (value != null)
+			if ( value != null )
 			{
-				config.setProperty(key, value);
+				config.setProperty( key, value );
 			}
 			else
 			{
-				config.remove(key);
+				config.remove( key );
 			}
 		}
-	}
-
-	/**
-	 * Ausgabe eines Log-Strings über den Log-Mechanismus des HBCI-Kernels.
-	 *
-	 * @param st
-	 *            der auszugebende String
-	 * @param level
-	 *            die "Wichtigkeit" dieser Meldung. mögliche Werte:
-	 *            <ul>
-	 *            <li><code>LOG_ERR</code></li>
-	 *            <li><code>LOG_WARN</code></li>
-	 *            <li><code>LOG_INFO</code></li>
-	 *            <li><code>LOG_DEBUG</code></li>
-	 *            <li><code>LOG_CHIPCARD</code> (wird nur intern benutzt)</li>
-	 *            </ul>
-	 */
-	public static synchronized void log ( String st, int level )
-	{
-		if (level <= Integer.parseInt(getParam("log.loglevel.default", "2")))
-		{
-			StackTraceElement trace = null;
-			try
-			{
-				throw new Exception("");
-			}
-			catch (Exception e)
-			{
-				trace = e.getStackTrace()[1];
-			}
-
-			int filterLevel = Integer.parseInt(HBCIUtils.getParam("log.filter", "2"));
-			if (filterLevel != 0)
-			{
-				st = LogFilter.getInstance().filterLine(st, filterLevel);
-			}
-
-//			HBCIUtilsInternal.getCallback().log(st, level, new Date(), trace);
-		}
-	}
-
-	/**
-	 * Ausgabe der Meldungen einer Exception-Kette mit dem Level
-	 * <code>LOG_ERR</code>.
-	 *
-	 * @param e
-	 *            die Exception, deren <code>getMessage()</code>-Meldungen
-	 *            geloggt werden sollen
-	 */
-	public static synchronized void log ( Exception e )
-	{
-		log(e, LOG_ERR);
 	}
 
 	/**
 	 * Gibt den StackTrace einer Exception zurück.
 	 *
 	 * @param e
-	 *            Exception
+	 *        Exception
 	 * @return kompletter StackTrace als String
 	 */
-	public static String exception2String ( Exception e )
+	public static String exception2String( Exception e )
 	{
 		StringWriter sw = new StringWriter();
-		e.printStackTrace(new PrintWriter(sw));
+		e.printStackTrace( new PrintWriter( sw ) );
 		return sw.toString().trim();
 	}
 
@@ -1364,25 +1188,25 @@ public final class HBCIUtils
 	 * Extrahieren der root-Exception aus einer Exception-Chain.
 	 *
 	 * @param e
-	 *            Exception
+	 *        Exception
 	 * @return String mit Infos zur root-Exception
 	 */
-	public static String exception2StringShort ( Exception e )
+	public static String exception2StringShort( Exception e )
 	{
 		StringBuffer st = new StringBuffer();
 		Throwable e2 = e;
 
-		while (e2 != null)
+		while ( e2 != null )
 		{
 			String exClass = e2.getClass().getName();
 			String msg = e2.getMessage();
 
-			if (msg != null)
+			if ( msg != null )
 			{
-				st.setLength(0);
-				st.append(exClass);
-				st.append(": ");
-				st.append(msg);
+				st.setLength( 0 );
+				st.append( exClass );
+				st.append( ": " );
+				st.append( msg );
 			}
 			e2 = e2.getCause();
 		}
@@ -1391,46 +1215,27 @@ public final class HBCIUtils
 	}
 
 	/**
-	 * Ausgabe der Meldungen einer Exception-Kette über den Log-Mechanismus des
-	 * HBCI-Kernels. Es werden auch alle <code>getCause()</code>-Exceptions
-	 * verfolgt und deren Meldung ausgegeben. Enthält keine der Exceptions
-	 * dieser Kette eine Message, so wird statt dessen ein Stacktrace
-	 * ausgegeben.
-	 *
-	 * @param e
-	 *            die Exception, deren <code>getMessage()</code>-Meldungen
-	 *            ausgegeben werden sollen.
-	 * @param level
-	 *            der Log-Level, mit dem die Meldungen geloggt werden sollen.
-	 *            Siehe dazu auch {@link #log(String,int)}
-	 */
-	public static synchronized void log ( Exception e, int level )
-	{
-		log(exception2String(e), level);
-	}
-
-	/**
 	 * Wandelt ein Byte-Array in eine entsprechende hex-Darstellung um.
 	 *
 	 * @param data
-	 *            das Byte-Array, für das eine Hex-Darstellung erzeugt werden
-	 *            soll
+	 *        das Byte-Array, für das eine Hex-Darstellung erzeugt werden
+	 *        soll
 	 * @return einen String, der für jedes Byte aus <code>data</code> zwei
 	 *         Zeichen (0-9,A-F) enthält.
 	 */
-	public static String data2hex ( byte[] data )
+	public static String data2hex( byte[] data )
 	{
 		StringBuffer ret = new StringBuffer();
 
-		for (int i = 0; i < data.length; i++)
+		for ( int i = 0; i < data.length; i++ )
 		{
-			String st = Integer.toHexString(data[i]);
-			if (st.length() == 1)
+			String st = Integer.toHexString( data[i] );
+			if ( st.length() == 1 )
 			{
 				st = '0' + st;
 			}
-			st = st.substring(st.length() - 2);
-			ret.append(st).append(" ");
+			st = st.substring( st.length() - 2 );
+			ret.append( st ).append( " " );
 		}
 
 		return ret.toString();
@@ -1442,20 +1247,20 @@ public final class HBCIUtils
 	 * (siehe Kernel-Parameter <code>kernel.locale.*</code>)
 	 *
 	 * @param date
-	 *            ein Datum
+	 *        ein Datum
 	 * @return die lokalisierte Darstellung dieses Datums als String
 	 */
-	public static String date2StringLocal ( Date date )
+	public static String date2StringLocal( Date date )
 	{
 		String ret;
 
 		try
 		{
-			ret = DateFormat.getDateInstance(DateFormat.SHORT, HBCIUtils.getLocale()).format(date);
+			ret = DateFormat.getDateInstance( DateFormat.SHORT, HBCIUtils.getLocale() ).format( date );
 		}
-		catch (Exception e)
+		catch ( Exception e )
 		{
-			throw new InvalidArgumentException(date.toString());
+			throw new InvalidArgumentException( date.toString() );
 		}
 
 		return ret;
@@ -1467,20 +1272,20 @@ public final class HBCIUtils
 	 * <code>kernel.locale.*</code>), in ein Datumsobjekt um
 	 *
 	 * @param date
-	 *            ein Datum in der lokalen Stringdarstellung
+	 *        ein Datum in der lokalen Stringdarstellung
 	 * @return ein entsprechendes Datumsobjekt
 	 */
-	public static Date string2DateLocal ( String date )
+	public static Date string2DateLocal( String date )
 	{
 		Date ret;
 
 		try
 		{
-			ret = DateFormat.getDateInstance(DateFormat.SHORT, HBCIUtils.getLocale()).parse(date);
+			ret = DateFormat.getDateInstance( DateFormat.SHORT, HBCIUtils.getLocale() ).parse( date );
 		}
-		catch (Exception e)
+		catch ( Exception e )
 		{
-			throw new InvalidArgumentException(date);
+			throw new InvalidArgumentException( date );
 		}
 
 		return ret;
@@ -1493,20 +1298,20 @@ public final class HBCIUtils
 	 * <code>kernel.locale.*</code>).
 	 *
 	 * @param date
-	 *            ein Datumsobjekt
+	 *        ein Datumsobjekt
 	 * @return die lokalisierte Darstellung der Uhrzeit als String
 	 */
-	public static String time2StringLocal ( Date date )
+	public static String time2StringLocal( Date date )
 	{
 		String ret;
 
 		try
 		{
-			ret = DateFormat.getTimeInstance(DateFormat.SHORT, HBCIUtils.getLocale()).format(date);
+			ret = DateFormat.getTimeInstance( DateFormat.SHORT, HBCIUtils.getLocale() ).format( date );
 		}
-		catch (Exception e)
+		catch ( Exception e )
 		{
-			throw new InvalidArgumentException(date.toString());
+			throw new InvalidArgumentException( date.toString() );
 		}
 
 		return ret;
@@ -1518,20 +1323,20 @@ public final class HBCIUtils
 	 * <code>kernel.locale.*</code>), in ein Datumsobjekt um
 	 *
 	 * @param date
-	 *            eine Uhrzeit in der lokalen Stringdarstellung
+	 *        eine Uhrzeit in der lokalen Stringdarstellung
 	 * @return ein entsprechendes Datumsobjekt
 	 */
-	public static Date string2TimeLocal ( String date )
+	public static Date string2TimeLocal( String date )
 	{
 		Date ret;
 
 		try
 		{
-			ret = DateFormat.getTimeInstance(DateFormat.SHORT, HBCIUtils.getLocale()).parse(date);
+			ret = DateFormat.getTimeInstance( DateFormat.SHORT, HBCIUtils.getLocale() ).parse( date );
 		}
-		catch (Exception e)
+		catch ( Exception e )
 		{
-			throw new InvalidArgumentException(date);
+			throw new InvalidArgumentException( date );
 		}
 
 		return ret;
@@ -1544,20 +1349,20 @@ public final class HBCIUtils
 	 * <code>kernel.locale.*</code>).
 	 *
 	 * @param date
-	 *            ein Datumsobjekt
+	 *        ein Datumsobjekt
 	 * @return die lokalisierte Darstellung des Datums-Objektes
 	 */
-	public static String datetime2StringLocal ( Date date )
+	public static String datetime2StringLocal( Date date )
 	{
 		String ret;
 
 		try
 		{
-			ret = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, HBCIUtils.getLocale()).format(date);
+			ret = DateFormat.getDateTimeInstance( DateFormat.SHORT, DateFormat.SHORT, HBCIUtils.getLocale() ).format( date );
 		}
-		catch (Exception e)
+		catch ( Exception e )
 		{
-			throw new InvalidArgumentException(date.toString());
+			throw new InvalidArgumentException( date.toString() );
 		}
 
 		return ret;
@@ -1570,82 +1375,82 @@ public final class HBCIUtils
 	 * Kernel-Parameter <code>kernel.locale.*</code>)).
 	 *
 	 * @param date
-	 *            ein Datum in der lokalen Stringdarstellung
+	 *        ein Datum in der lokalen Stringdarstellung
 	 * @param time
-	 *            eine Uhrzeit in der lokalen Stringdarstellung (darf
-	 *            <code>null</code> sein)
+	 *        eine Uhrzeit in der lokalen Stringdarstellung (darf
+	 *        <code>null</code> sein)
 	 * @return ein entsprechendes Datumsobjekt
 	 */
-	public static Date strings2DateTimeLocal ( String date, String time )
+	public static Date strings2DateTimeLocal( String date, String time )
 	{
 		Date ret;
 
 		try
 		{
-			if (time != null)
+			if ( time != null )
 			{
-				ret = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, HBCIUtils.getLocale()).parse(date + " " + time);
+				ret = DateFormat.getDateTimeInstance( DateFormat.SHORT, DateFormat.SHORT, HBCIUtils.getLocale() ).parse( date + " " + time );
 			}
 			else
 			{
-				ret = DateFormat.getDateInstance(DateFormat.SHORT, HBCIUtils.getLocale()).parse(date);
+				ret = DateFormat.getDateInstance( DateFormat.SHORT, HBCIUtils.getLocale() ).parse( date );
 			}
 		}
-		catch (Exception e)
+		catch ( Exception e )
 		{
-			throw new InvalidArgumentException(date + " / " + time);
+			throw new InvalidArgumentException( date + " / " + time );
 		}
 
 		return ret;
 	}
 
 	/** Erzeugt einen String im Format YYYY-MM-DD */
-	public static String date2StringISO ( Date date )
+	public static String date2StringISO( Date date )
 	{
-		return new SimpleDateFormat("yyyy-MM-dd").format(date);
+		return new SimpleDateFormat( "yyyy-MM-dd" ).format( date );
 	}
 
 	/**
 	 * Wandelt einen String der Form YYYY-MM-DD in ein <code>Date</code>-Objekt
 	 * um.
 	 */
-	public static Date string2DateISO ( String st )
+	public static Date string2DateISO( String st )
 	{
 		try
 		{
-			return new SimpleDateFormat("yyyy-MM-dd").parse(st);
+			return new SimpleDateFormat( "yyyy-MM-dd" ).parse( st );
 		}
-		catch (ParseException e)
+		catch ( ParseException e )
 		{
-			throw new InvalidArgumentException(st);
+			throw new InvalidArgumentException( st );
 		}
 	}
 
 	/** Erzeugt einen String der Form HH:MM:SS */
-	public static String time2StringISO ( Date date )
+	public static String time2StringISO( Date date )
 	{
-		return new SimpleDateFormat("HH:mm:ss").format(date);
+		return new SimpleDateFormat( "HH:mm:ss" ).format( date );
 	}
 
 	/**
 	 * Wandelt einen String der Form HH:MM:SS in ein <code>Date</code>-Objekt um
 	 */
-	public static Date string2TimeISO ( String st )
+	public static Date string2TimeISO( String st )
 	{
 		try
 		{
-			return new SimpleDateFormat("HH:mm:ss").parse(st);
+			return new SimpleDateFormat( "HH:mm:ss" ).parse( st );
 		}
-		catch (ParseException e)
+		catch ( ParseException e )
 		{
-			throw new InvalidArgumentException(st);
+			throw new InvalidArgumentException( st );
 		}
 	}
 
 	/** Erzeugt einen String im Format YYYY-MM-DD HH:MM:SS */
-	public static String datetime2StringISO ( Date date )
+	public static String datetime2StringISO( Date date )
 	{
-		return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+		return new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" ).format( date );
 	}
 
 	/**
@@ -1656,44 +1461,44 @@ public final class HBCIUtils
 	 * <code>date</code> jedoch nicht.
 	 *
 	 * @param date
-	 *            ein Datum in der ISO-Darstellung
+	 *        ein Datum in der ISO-Darstellung
 	 * @param time
-	 *            eine Uhrzeit in der ISO-Darstellung (darf auch
-	 *            <code>null</code> sein)
+	 *        eine Uhrzeit in der ISO-Darstellung (darf auch
+	 *        <code>null</code> sein)
 	 * @return ein entsprechendes Datumsobjekt
 	 */
-	public static Date strings2DateTimeISO ( String date, String time )
+	public static Date strings2DateTimeISO( String date, String time )
 	{
-		if (date == null)
+		if ( date == null )
 		{
-			throw new InvalidArgumentException("*** date must not be null");
+			throw new InvalidArgumentException( "*** date must not be null" );
 		}
 
 		Date result;
 		try
 		{
-			if (time != null)
+			if ( time != null )
 			{
-				result = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(date + " " + time);
+				result = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" ).parse( date + " " + time );
 			}
 			else
 			{
-				result = new SimpleDateFormat("yyyy-MM-dd").parse(date);
+				result = new SimpleDateFormat( "yyyy-MM-dd" ).parse( date );
 			}
 		}
-		catch (ParseException e)
+		catch ( ParseException e )
 		{
-			throw new InvalidArgumentException(date + " / " + time);
+			throw new InvalidArgumentException( date + " / " + time );
 		}
 
 		return result;
 	}
 
-	private static void errDeprecated ( String method )
+	private static void errDeprecated( String method )
 	{
-		HBCIUtils.log("programming error: the method " + method + "() has been deprecated, is very dangerous and will be removed soon.", HBCIUtils.LOG_ERR);
-		HBCIUtils.log("programming error: please check your application to replace calls to " + method + "() with calls to either " + method + "Local() or "
-				+ method + "ISO()", HBCIUtils.LOG_ERR);
+		logger.error( "programming error: the method " + method + "() has been deprecated, is very dangerous and will be removed soon." );
+		logger.error( "programming error: please check your application to replace calls to " + method + "() with calls to either " + method + "Local() or "
+				+ method + "ISO()" );
 	}
 
 	/**
@@ -1702,10 +1507,10 @@ public final class HBCIUtils
 	 * @deprecated
 	 */
 	@Deprecated
-	public static String date2String ( Date date )
+	public static String date2String( Date date )
 	{
-		errDeprecated("date2String");
-		return date2StringLocal(date);
+		errDeprecated( "date2String" );
+		return date2StringLocal( date );
 	}
 
 	/**
@@ -1714,10 +1519,10 @@ public final class HBCIUtils
 	 * @deprecated
 	 */
 	@Deprecated
-	public static Date string2Date ( String st )
+	public static Date string2Date( String st )
 	{
-		errDeprecated("string2Date");
-		return string2DateLocal(st);
+		errDeprecated( "string2Date" );
+		return string2DateLocal( st );
 	}
 
 	/**
@@ -1726,10 +1531,10 @@ public final class HBCIUtils
 	 * @deprecated
 	 */
 	@Deprecated
-	public static String time2String ( Date date )
+	public static String time2String( Date date )
 	{
-		errDeprecated("time2String");
-		return time2StringLocal(date);
+		errDeprecated( "time2String" );
+		return time2StringLocal( date );
 	}
 
 	/**
@@ -1738,10 +1543,10 @@ public final class HBCIUtils
 	 * @deprecated
 	 */
 	@Deprecated
-	public static Date string2Time ( String st )
+	public static Date string2Time( String st )
 	{
-		errDeprecated("string2Time");
-		return string2TimeLocal(st);
+		errDeprecated( "string2Time" );
+		return string2TimeLocal( st );
 	}
 
 	/**
@@ -1750,10 +1555,10 @@ public final class HBCIUtils
 	 * @deprecated
 	 */
 	@Deprecated
-	public static String datetime2String ( Date date )
+	public static String datetime2String( Date date )
 	{
-		errDeprecated("datetime2String");
-		return datetime2StringLocal(date);
+		errDeprecated( "datetime2String" );
+		return datetime2StringLocal( date );
 	}
 
 	/**
@@ -1762,10 +1567,10 @@ public final class HBCIUtils
 	 * @deprecated
 	 */
 	@Deprecated
-	public static Date strings2DateTime ( String date, String time )
+	public static Date strings2DateTime( String date, String time )
 	{
-		errDeprecated("strings2DateTime");
-		return strings2DateTimeLocal(date, time);
+		errDeprecated( "strings2DateTime" );
+		return strings2DateTimeLocal( date, time );
 	}
 
 	/**
@@ -1774,49 +1579,49 @@ public final class HBCIUtils
 	 * entsprechenden Base64-Kodierung.
 	 *
 	 * @param x
-	 *            zu kodierende Daten
+	 *        zu kodierende Daten
 	 * @return String mit Base64-kodierten Daten
 	 */
-	public static String encodeBase64 ( byte[] x )
+	public static String encodeBase64( byte[] x )
 	{
 		try
 		{
 			int origSize = x.length;
 
-			if ( ( origSize % 3 ) != 0)
+			if ( (origSize % 3) != 0 )
 			{
-				byte[] temp = new byte[ ( ( origSize / 3 ) + 1 ) * 3];
-				System.arraycopy(x, 0, temp, 0, origSize);
+				byte[] temp = new byte[((origSize / 3) + 1) * 3];
+				System.arraycopy( x, 0, temp, 0, origSize );
 				x = temp;
 			}
 
 			StringBuffer ret = new StringBuffer();
 			int readPos = 0;
 
-			while (readPos < ( x.length << 3 ))
+			while ( readPos < (x.length << 3) )
 			{
 				int modulus = readPos & 7;
 				int value;
 
-				if ( ( readPos >> 3 ) < origSize)
+				if ( (readPos >> 3) < origSize )
 				{
-					if (modulus <= 2)
+					if ( modulus <= 2 )
 					{
 						// six bits in one byte
-						value = ( x[readPos >> 3] >> ( 2 - modulus ) ) & 0x3F;
+						value = (x[readPos >> 3] >> (2 - modulus)) & 0x3F;
 					}
 					else
 					{
 						// six bits in two bytes
-						value = ( ( x[readPos >> 3] << ( modulus - 2 ) ) & 0x3F )
-								| ( ( x[ ( readPos >> 3 ) + 1] >> ( 10 - modulus ) ) & ( ( 1 << ( modulus - 2 ) ) - 1 ) );
+						value = ((x[readPos >> 3] << (modulus - 2)) & 0x3F)
+								| ((x[(readPos >> 3) + 1] >> (10 - modulus)) & ((1 << (modulus - 2)) - 1));
 					}
 
-					ret.append(base64table[value]);
+					ret.append( base64table[value] );
 				}
 				else
 				{
-					ret.append('=');
+					ret.append( '=' );
 
 				}
 				readPos += 6;
@@ -1824,9 +1629,9 @@ public final class HBCIUtils
 
 			return ret.toString();
 		}
-		catch (Exception ex)
+		catch ( Exception ex )
 		{
-			throw new HBCI_Exception(HBCIUtilsInternal.getLocMsg("EXCMSG_UTIL_ENCB64"), ex);
+			throw new HBCI_Exception( HBCIUtils.getLocMsg( "EXCMSG_UTIL_ENCB64" ), ex );
 		}
 	}
 
@@ -1835,14 +1640,14 @@ public final class HBCIUtils
 	 * Base64-Datenstrom der dazugehörige "Klartext" zurückgegeben.
 	 *
 	 * @param st
-	 *            Base64-kodierten Daten
+	 *        Base64-kodierten Daten
 	 * @return dekodierter Datenstrom als Byte-Array
 	 */
-	public static byte[] decodeBase64 ( String st )
+	public static byte[] decodeBase64( String st )
 	{
 		try
 		{
-			byte[] source = st.getBytes(Comm.ENCODING);
+			byte[] source = st.getBytes( Comm.ENCODING );
 			byte[] ret = new byte[st.length()];
 			int retlen = 0;
 
@@ -1852,21 +1657,21 @@ public final class HBCIUtils
 			int byteCounter = 0;
 			int[] values = new int[2];
 
-			for (int readPos = 0; readPos < source.length; readPos++)
+			for ( int readPos = 0; readPos < source.length; readPos++ )
 			{
 				values[0] = 0;
 				values[1] = 0;
 
-				for (int step = 0; step < 2; step++)
+				for ( int step = 0; step < 2; step++ )
 				{
 					int value = 0;
 
-					while ( ( readPos + step ) < source.length)
+					while ( (readPos + step) < source.length )
 					{
 						value = source[readPos + step];
 
-						if (value >= '0' && value <= '9' || value >= 'A' && value <= 'Z' || value >= 'a' && value <= 'z' || value == '+' || value == '/'
-								|| value == '=')
+						if ( value >= '0' && value <= '9' || value >= 'A' && value <= 'Z' || value >= 'a' && value <= 'z' || value == '+' || value == '/'
+								|| value == '=' )
 						{
 							break;
 						}
@@ -1874,26 +1679,26 @@ public final class HBCIUtils
 						readPos++;
 					}
 
-					if (! ( value >= '0' && value <= '9' || value >= 'A' && value <= 'Z' || value >= 'a' && value <= 'z' || value == '+' || value == '/' ))
+					if ( !(value >= '0' && value <= '9' || value >= 'A' && value <= 'Z' || value >= 'a' && value <= 'z' || value == '+' || value == '/') )
 					{
 
 						abort = true;
 						break;
 					}
 
-					if ((char) value == '/')
+					if ( (char) value == '/' )
 					{
 						value = 63;
 					}
-					else if ((char) value == '+')
+					else if ( (char) value == '+' )
 					{
 						value = 62;
 					}
-					else if ((char) value <= '9')
+					else if ( (char) value <= '9' )
 					{
 						value = 52 + value - (byte) '0';
 					}
-					else if ((char) value <= 'Z')
+					else if ( (char) value <= 'Z' )
 					{
 						value = value - (byte) 'A';
 					}
@@ -1902,24 +1707,24 @@ public final class HBCIUtils
 						value = 26 + value - (byte) 'a';
 
 					}
-					if (step == 0)
+					if ( step == 0 )
 					{
-						values[0] = ( value << ( 8 - needFromFirst ) ) & 0xFF;
+						values[0] = (value << (8 - needFromFirst)) & 0xFF;
 					}
 					else
 					{
-						values[1] = ( value >> ( 6 - needFromSecond ) ) & 0xFF;
+						values[1] = (value >> (6 - needFromSecond)) & 0xFF;
 					}
 				}
 
-				if (abort)
+				if ( abort )
 				{
 					break;
 				}
 
-				ret[retlen++] = (byte) ( values[0] | values[1] );
+				ret[retlen++] = (byte) (values[0] | values[1]);
 
-				if ( ( byteCounter & 3 ) == 2)
+				if ( (byteCounter & 3) == 2 )
 				{
 					readPos++;
 					byteCounter++;
@@ -1936,16 +1741,16 @@ public final class HBCIUtils
 			}
 
 			byte[] ret2 = new byte[retlen];
-			System.arraycopy(ret, 0, ret2, 0, retlen);
+			System.arraycopy( ret, 0, ret2, 0, retlen );
 			return ret2;
 		}
-		catch (Exception ex)
+		catch ( Exception ex )
 		{
-			throw new HBCI_Exception(HBCIUtilsInternal.getLocMsg("EXCMSG_UTIL_DECB64"), ex);
+			throw new HBCI_Exception( HBCIUtils.getLocMsg( "EXCMSG_UTIL_DECB64" ), ex );
 		}
 	}
 
-	private static Method getAccountCRCMethodByAlg ( String alg )
+	private static Method getAccountCRCMethodByAlg( String alg )
 	{
 		Class<AccountCRCAlgs> cl = null;
 		Method method = null;
@@ -1953,11 +1758,11 @@ public final class HBCIUtils
 		try
 		{
 			cl = AccountCRCAlgs.class;
-			method = cl.getMethod("alg_" + alg, new Class[] { int[].class, int[].class });
+			method = cl.getMethod( "alg_" + alg, new Class[] { int[].class, int[].class } );
 		}
-		catch (Exception e)
+		catch ( Exception e )
 		{
-			log("CRC algorithm " + alg + " not yet implemented", LOG_WARN);
+			logger.warn( "CRC algorithm " + alg + " not yet implemented" );
 		}
 
 		return method;
@@ -1976,26 +1781,26 @@ public final class HBCIUtils
 	 * </p>
 	 *
 	 * @param blz
-	 *            Die BLZ der Bank
+	 *        Die BLZ der Bank
 	 * @return <code>true</code>, wenn die Kontonummern für diese Bank mit
 	 *         <em>HBCI4Java</em> validiert werden können, sonst
 	 *         <code>false</code>
 	 */
-	public static boolean canCheckAccountCRC ( String blz )
+	public static boolean canCheckAccountCRC( String blz )
 	{
-		BankInfo info = getBankInfo(blz);
-		if (info == null)
+		BankInfo info = getBankInfo( blz );
+		if ( info == null )
 		{
 			return false;
 		}
 
 		String alg = info.getChecksumMethod();
-		if (alg == null || alg.length() != 2)
+		if ( alg == null || alg.length() != 2 )
 		{
 			return false;
 		}
 
-		Method method = getAccountCRCMethodByAlg(alg);
+		Method method = getAccountCRCMethodByAlg( alg );
 		return method != null;
 	}
 
@@ -2013,9 +1818,9 @@ public final class HBCIUtils
 	 * </p>
 	 *
 	 * @param blz
-	 *            die Bankleitzahl der Bank, bei der das Konto geführt wird
+	 *        die Bankleitzahl der Bank, bei der das Konto geführt wird
 	 * @param number
-	 *            die zu überprüfende Kontonummer
+	 *        die zu überprüfende Kontonummer
 	 * @return <code>true</code> wenn die Kontonummer nicht verifiziert werden
 	 *         kann (z.B. weil das jeweilige Prüfzifferverfahren noch nicht in
 	 *         <em>HBCI4Java</em> implementiert ist) oder wenn die Prüfung
@@ -2023,35 +1828,35 @@ public final class HBCIUtils
 	 *         zurückgegeben, wenn tatsächlich ein Prüfzifferverfahren zum
 	 *         Überprüfen verwendet wurde und die Prüfung einen Fehler ergab
 	 */
-	public static boolean checkAccountCRC ( String blz, String number )
+	public static boolean checkAccountCRC( String blz, String number )
 	{
-		BankInfo info = getBankInfo(blz);
+		BankInfo info = getBankInfo( blz );
 		String alg = info != null ? info.getChecksumMethod() : null;
 
 		// Im Zweifel lassen wir die Bankverbindung lieber durch
-		if (alg == null || alg.length() != 2)
+		if ( alg == null || alg.length() != 2 )
 		{
-			HBCIUtils.log("no crc information about " + blz + " in database", HBCIUtils.LOG_WARN);
+			logger.warn( "no crc information about " + blz + " in database" );
 			return true;
 		}
 
-		HBCIUtils.log("crc-checking " + blz + "/" + number, HBCIUtils.LOG_DEBUG);
-		return checkAccountCRCByAlg(alg, blz, number);
+		logger.debug( "crc-checking " + blz + "/" + number );
+		return checkAccountCRCByAlg( alg, blz, number );
 	}
 
 	/**
 	 * Used to convert a blz or an account number to an array of ints, one array
 	 * element per digit.
 	 */
-	private static int[] string2Ints ( String st, int target_length )
+	private static int[] string2Ints( String st, int target_length )
 	{
 		int[] numbers = new int[target_length];
 		int st_len = st.length();
 		char ch;
 
-		for (int i = 0; i < st_len; i++)
+		for ( int i = 0; i < st_len; i++ )
 		{
-			ch = st.charAt(i);
+			ch = st.charAt( i );
 			numbers[target_length - st_len + i] = ch - '0';
 		}
 
@@ -2064,51 +1869,51 @@ public final class HBCIUtils
 	 * aufgerufen und kann für Debugging-Zwecke auch direkt benutzt werden.
 	 *
 	 * @param alg
-	 *            Nummer des zu verwendenden Prüfziffer-Algorithmus (siehe Datei
-	 *            <code>blz.properties</code>).
+	 *        Nummer des zu verwendenden Prüfziffer-Algorithmus (siehe Datei
+	 *        <code>blz.properties</code>).
 	 * @param blz
-	 *            zu überprüfende Bankleitzahl
+	 *        zu überprüfende Bankleitzahl
 	 * @param number
-	 *            zu überprüfende Kontonummer
+	 *        zu überprüfende Kontonummer
 	 * @return <code>false</code>, wenn der Prüfzifferalgorithmus für die
 	 *         angegebene Kontonummer einen Fehler meldet, sonst
 	 *         <code>true</code> (siehe dazu auch
 	 *         {@link #checkAccountCRC(String, String)})
 	 */
-	public static boolean checkAccountCRCByAlg ( String alg, String blz, String number )
+	public static boolean checkAccountCRCByAlg( String alg, String blz, String number )
 	{
 		boolean ret = true;
 
-		if (blz == null || number == null)
+		if ( blz == null || number == null )
 		{
-			throw new NullPointerException("blz and number must not be null");
+			throw new NullPointerException( "blz and number must not be null" );
 		}
 
-		if (number.length() <= 10)
+		if ( number.length() <= 10 )
 		{
-			Method method = getAccountCRCMethodByAlg(alg);
+			Method method = getAccountCRCMethodByAlg( alg );
 
-			if (method != null)
+			if ( method != null )
 			{
 				try
 				{
-					int[] blz_digits = string2Ints(blz, 8);
-					int[] number_digits = string2Ints(number, 10);
+					int[] blz_digits = string2Ints( blz, 8 );
+					int[] number_digits = string2Ints( number, 10 );
 
 					Object[] args = new Object[] { blz_digits, number_digits };
-					ret = ( (Boolean) method.invoke(null, args) ).booleanValue();
+					ret = ((Boolean) method.invoke( null, args )).booleanValue();
 
-					HBCIUtils.log("CRC check for " + blz + "/" + number + " with alg " + alg + ": " + ret, HBCIUtils.LOG_DEBUG);
+					logger.debug( "CRC check for " + blz + "/" + number + " with alg " + alg + ": " + ret );
 				}
-				catch (Exception e)
+				catch ( Exception e )
 				{
-					throw new HBCI_Exception(e);
+					throw new HBCI_Exception( e );
 				}
 			}
 		}
 		else
 		{
-			HBCIUtils.log("can not check account numbers with more than 10 digits (" + number + ")- skipping CRC check", HBCIUtils.LOG_WARN);
+			logger.warn( "can not check account numbers with more than 10 digits (" + number + ")- skipping CRC check" );
 		}
 
 		return ret;
@@ -2120,9 +1925,9 @@ public final class HBCIUtils
 	 * @deprecated
 	 */
 	@Deprecated
-	public static boolean checkAccountCRCByAlg ( String alg, String number )
+	public static boolean checkAccountCRCByAlg( String alg, String number )
 	{
-		return checkAccountCRCByAlg(alg, "", number);
+		return checkAccountCRCByAlg( alg, "", number );
 	}
 
 	/**
@@ -2132,9 +1937,9 @@ public final class HBCIUtils
 	 * @return <code>false</code> wenn der Prüfzifferntest fehlschlägt, sonst
 	 *         <code>true</code>
 	 */
-	public static boolean checkIBANCRC ( String iban )
+	public static boolean checkIBANCRC( String iban )
 	{
-		return AccountCRCAlgs.checkIBAN(iban);
+		return AccountCRCAlgs.checkIBAN( iban );
 	}
 
 	/**
@@ -2143,31 +1948,32 @@ public final class HBCIUtils
 	 * ist.
 	 *
 	 * @param creditorId
-	 *            die zu pruefende Creditor-ID.
+	 *        die zu pruefende Creditor-ID.
 	 * @return <code>false</code> wenn der Prüfzifferntest fehlschlägt, sonst
 	 *         <code>true</code>
 	 */
-	public static boolean checkCredtitorIdCRC ( String creditorId )
+	public static boolean checkCredtitorIdCRC( String creditorId )
 	{
-		return AccountCRCAlgs.checkCreditorId(creditorId);
+		return AccountCRCAlgs.checkCreditorId( creditorId );
 	}
 
-	private static void refreshBLZList ( ClassLoader cl ) throws IOException
+	private static void refreshBLZList( ClassLoader cl )
+			throws IOException
 	{
-		String blzpath = HBCIUtils.getParam("kernel.kernel.blzpath");
-		if (blzpath == null)
+		String blzpath = HBCIUtils.getParam( "kernel.kernel.blzpath" );
+		if ( blzpath == null )
 		{
 			blzpath = "";
 		}
 		blzpath += "blz.properties";
-		InputStream f = cl.getResourceAsStream(blzpath);
+		InputStream f = cl.getResourceAsStream( blzpath );
 
-		if (f == null)
+		if ( f == null )
 		{
-			throw new InvalidUserDataException(HBCIUtilsInternal.getLocMsg("EXCMSG_BLZLOAD", blzpath));
+			throw new InvalidUserDataException( HBCIUtils.getLocMsg( "EXCMSG_BLZLOAD", blzpath ) );
 		}
 
-		refreshBLZList(f);
+		refreshBLZList( f );
 		f.close();
 	}
 
@@ -2181,26 +1987,27 @@ public final class HBCIUtils
 	 * <code>blz.properties</code> ersichtlich.
 	 *
 	 * @param in
-	 *            Eingabe-Stream, der für das Laden der Bankleitzahlen-Daten
-	 *            verwendet werden soll
+	 *        Eingabe-Stream, der für das Laden der Bankleitzahlen-Daten
+	 *        verwendet werden soll
 	 * @throws IOException
 	 **/
-	public static synchronized void refreshBLZList ( InputStream in ) throws IOException
+	public static synchronized void refreshBLZList( InputStream in )
+			throws IOException
 	{
-		HBCIUtils.log("trying to load BLZ data", HBCIUtils.LOG_DEBUG);
-		InputStreamReader isr = new InputStreamReader(in, "UTF-8");
+		logger.debug( "trying to load BLZ data" );
+		InputStreamReader isr = new InputStreamReader( in, "UTF-8" );
 		blzs.clear();
-		blzs.load(isr);
+		blzs.load( isr );
 
 		banks.clear();
-		for (Entry<Object, Object> e : blzs.entrySet())
+		for ( Entry<Object, Object> e : blzs.entrySet() )
 		{
 			String blz = (String) e.getKey();
 			String value = (String) e.getValue();
 
-			BankInfo info = BankInfo.parse(value);
-			info.setBlz(blz);
-			banks.put(blz, info);
+			BankInfo info = BankInfo.parse( value );
+			info.setBlz( blz );
+			banks.put( blz, info );
 		}
 	}
 
@@ -2209,14 +2016,14 @@ public final class HBCIUtils
 	 * Nachkommastellen.
 	 *
 	 * @param st
-	 *            String, der konvertiert werden soll (Format
-	 *            "<code>1234.56</code>");
+	 *        String, der konvertiert werden soll (Format
+	 *        "<code>1234.56</code>");
 	 * @return BigDecimal-Wert
 	 */
-	public static BigDecimal string2BigDecimal ( String st )
+	public static BigDecimal string2BigDecimal( String st )
 	{
-		BigDecimal result = new BigDecimal(st);
-		result.setScale(2, BigDecimal.ROUND_HALF_EVEN);
+		BigDecimal result = new BigDecimal( st );
+		result.setScale( 2, BigDecimal.ROUND_HALF_EVEN );
 		return result;
 	}
 
@@ -2226,17 +2033,17 @@ public final class HBCIUtils
 	 * als Dezimaltrennzeichen).
 	 *
 	 * @param value
-	 *            zu konvertierender BigDecimal-Wert
+	 *        zu konvertierender BigDecimal-Wert
 	 * @return String-Darstellung dieses Wertes
 	 */
-	public static String bigDecimal2String ( BigDecimal value )
+	public static String bigDecimal2String( BigDecimal value )
 	{
-		DecimalFormat format = new DecimalFormat("0.00");
+		DecimalFormat format = new DecimalFormat( "0.00" );
 		DecimalFormatSymbols symbols = format.getDecimalFormatSymbols();
-		symbols.setDecimalSeparator('.');
-		format.setDecimalFormatSymbols(symbols);
-		format.setDecimalSeparatorAlwaysShown(true);
-		return format.format(value);
+		symbols.setDecimalSeparator( '.' );
+		format.setDecimalFormatSymbols( symbols );
+		format.setDecimalSeparatorAlwaysShown( true );
+		return format.format( value );
 	}
 
 	/**
@@ -2244,15 +2051,15 @@ public final class HBCIUtils
 	 * <code>Double.parseDouble(st)</code>).
 	 *
 	 * @param st
-	 *            String, der konvertiert werden soll (Format
-	 *            "<code>1234.56</code>");
+	 *        String, der konvertiert werden soll (Format
+	 *        "<code>1234.56</code>");
 	 * @return double-Wert
 	 * @deprecated use {@link #string2BigDecimal(String)}
 	 */
 	@Deprecated
-	public static double string2Value ( String st )
+	public static double string2Value( String st )
 	{
-		return Double.parseDouble(st);
+		return Double.parseDouble( st );
 	}
 
 	/**
@@ -2261,19 +2068,19 @@ public final class HBCIUtils
 	 * als Dezimaltrennzeichen).
 	 *
 	 * @param value
-	 *            zu konvertierender Double-Wert
+	 *        zu konvertierender Double-Wert
 	 * @return String-Darstellung dieses Wertes
 	 * @deprecated use {@link #bigDecimal2String(BigDecimal)}
 	 */
 	@Deprecated
-	public static String value2String ( double value )
+	public static String value2String( double value )
 	{
-		DecimalFormat format = new DecimalFormat("0.00");
+		DecimalFormat format = new DecimalFormat( "0.00" );
 		DecimalFormatSymbols symbols = format.getDecimalFormatSymbols();
-		symbols.setDecimalSeparator('.');
-		format.setDecimalFormatSymbols(symbols);
-		format.setDecimalSeparatorAlwaysShown(true);
-		return format.format(value);
+		symbols.setDecimalSeparator( '.' );
+		format.setDecimalFormatSymbols( symbols );
+		format.setDecimalSeparatorAlwaysShown( true );
+		return format.format( value );
 	}
 
 	/**
@@ -2281,7 +2088,7 @@ public final class HBCIUtils
 	 *
 	 * @return verwendete <em>HBCI4Java</em>-Version
 	 */
-	public static String version ( )
+	public static String version()
 	{
 		return VERSION;
 	}
@@ -2294,14 +2101,14 @@ public final class HBCIUtils
 	 * geparsten Daten zur Verfügung.
 	 *
 	 * @param mt940
-	 *            Der zu parsende MT940-String
+	 *        Der zu parsende MT940-String
 	 * @return {@link org.kapott.hbci.GV_Result.GVRKUms GVRKUms}-Objekt für den
 	 *         einfachen Zugriff auf die Umsatzinformationen.
 	 */
-	public static GVRKUms parseMT940 ( String mt940 )
+	public static GVRKUms parseMT940( String mt940 )
 	{
 		GVRKUms result = new GVRKUms();
-		result.appendMT940Data(Swift.decodeUmlauts(mt940));
+		result.appendMT940Data( Swift.decodeUmlauts( mt940 ) );
 		return result;
 	}
 }

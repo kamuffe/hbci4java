@@ -103,7 +103,7 @@ public class ShowLowlevelGVs
             hbciversion=new BufferedReader(new InputStreamReader(System.in)).readLine();
         }
         
-        HBCIKernelImpl kernel=new HBCIKernelImpl(null,hbciversion);
+        HBCIKernelImpl kernel=new HBCIKernelImpl(null);
         MsgGen         msggen=kernel.getMsgGen();
         Document       syntax=msggen.getSyntax();
         

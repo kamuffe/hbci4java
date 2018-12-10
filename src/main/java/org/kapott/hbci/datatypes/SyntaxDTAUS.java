@@ -22,6 +22,7 @@
 package org.kapott.hbci.datatypes;
 
 import org.kapott.hbci.exceptions.InvalidArgumentException;
+import org.kapott.hbci.manager.HBCIUtils;
 import org.kapott.hbci.manager.HBCIUtilsInternal;
 
 // Speicherung im HBCI-MSG-Format
@@ -63,7 +64,7 @@ public class SyntaxDTAUS
                   (ch=='$') || 
                   (ch==0x5B) || (ch==0x5C) || (ch==0x5D) || (ch==0x7E))) {              // Ä Ö Ü ß
                 
-                String msg=HBCIUtilsInternal.getLocMsg("EXC_DTAUS_INV_CHAR",Character.toString(ch));
+                String msg=HBCIUtils.getLocMsg("EXC_DTAUS_INV_CHAR",Character.toString(ch));
                 if (!HBCIUtilsInternal.ignoreError(null,"client.errors.ignoreWrongDataSyntaxErrors",msg)) {
                     // [willuhn 2012-03-06, BUG 1129] Exception als fatal markieren
                     InvalidArgumentException e = new InvalidArgumentException(msg);

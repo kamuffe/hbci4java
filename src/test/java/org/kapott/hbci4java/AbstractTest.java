@@ -133,7 +133,6 @@ public abstract class AbstractTest
   {
     Locale.setDefault(Locale.GERMANY);
     Properties props = new Properties();
-    props.put("log.loglevel.default", "" + HBCIUtils.LOG_DEBUG2);
     props.putAll(System.getProperties());
 //    HBCIUtils.init(props);
     callback = new HBCICallbackConsole();
@@ -147,7 +146,7 @@ public abstract class AbstractTest
   @AfterClass
   public static void afterClassAbstractTest() throws Exception
   {
-    if (initialized.get())
+//    if (initialized.get())
 //      HBCIUtils.done();
   }
 }

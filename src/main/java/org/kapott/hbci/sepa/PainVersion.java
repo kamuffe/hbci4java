@@ -26,6 +26,8 @@ import org.kapott.hbci.GV.generators.ISEPAGenerator;
 import org.kapott.hbci.GV.parsers.ISEPAParser;
 import org.kapott.hbci.comm.Comm;
 import org.kapott.hbci.manager.HBCIUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -36,6 +38,11 @@ import org.w3c.dom.Node;
 @Deprecated
 public class PainVersion implements Comparable<PainVersion>
 {
+	/**
+	 * The {@link Logger} to be used.
+	 */
+	private static final Logger logger = LoggerFactory.getLogger( PainVersion.class );
+	
     private final static String DF_MAJOR = "000";
     private final static String DF_MINOR = "00";
     
@@ -422,7 +429,7 @@ public class PainVersion implements Comparable<PainVersion>
       
       if (!haveDesc && !haveData)
       {
-        HBCIUtils.log("neither sepadesr nor sepa data given",HBCIUtils.LOG_WARN);
+    	  logger.warn("neither sepadesr nor sepa data given");
         return null;
       }
       
@@ -431,8 +438,8 @@ public class PainVersion implements Comparable<PainVersion>
         final PainVersion versionDesc = haveDesc ? PainVersion.byURN(sepadesc) : null;
         final PainVersion versionData = haveData ? PainVersion.autodetect(new ByteArrayInputStream(sepadata.getBytes(Comm.ENCODING))) : null;
         
-        HBCIUtils.log("pain version given in sepadescr: " + versionDesc,HBCIUtils.LOG_INFO);
-        HBCIUtils.log("pain version according to data: " + versionData,HBCIUtils.LOG_INFO);
+        logger.info("pain version given in sepadescr: " + versionDesc);
+        logger.info("pain version according to data: " + versionData);
         
         // Wir haben keine Version im Deskriptor, dann bleibt nur die aus den Daten
         if (versionDesc == null)
@@ -444,7 +451,7 @@ public class PainVersion implements Comparable<PainVersion>
         
         // Wir geben noch eine Warnung aus, wenn unterschiedliche Versionen angegeben sind
         if (!versionDesc.equals(versionData))
-          HBCIUtils.log("pain version mismatch. sepadesc: " + versionDesc + " vs. data: " + versionData,HBCIUtils.LOG_WARN);
+        	logger.warn("pain version mismatch. sepadesc: " + versionDesc + " vs. data: " + versionData);
         
         // Wir geben priorisiert die Version aus den Daten zurueck, damit ist sicherer, dass die
         // Daten gelesen werden koennen
@@ -452,7 +459,7 @@ public class PainVersion implements Comparable<PainVersion>
       }
       catch (UnsupportedEncodingException e)
       {
-        HBCIUtils.log(e,HBCIUtils.LOG_ERR);
+    	  logger.error( "An error occurred.", e );
       }
       return null;
     }
