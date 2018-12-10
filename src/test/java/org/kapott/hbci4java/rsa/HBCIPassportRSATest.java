@@ -54,7 +54,7 @@ public class HBCIPassportRSATest extends AbstractTest {
     public void beforeCard() throws Exception {
         HBCIUtils.setParam("client.passport.RSA.path", dir.getAbsolutePath() + "/");
         HBCIUtils.setParam("client.passport.RSA.entryidx", "1");
-        this.passport = (HBCIPassportRSA) AbstractHBCIPassport.getInstance("RSA");
+        this.passport = (HBCIPassportRSA) AbstractHBCIPassport.getInstance("RSA", AbstractTest.callback);
     }
     
     @After

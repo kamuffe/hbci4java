@@ -34,14 +34,15 @@ public class DefaultHBCIPassportFactory implements HBCIPassportFactory
     @Override
     public HBCIPassport createPassport() throws Exception
     {
-        if (name == null)
-        {
-            return AbstractHBCIPassport.getInstance(init);
-        }
-        else
-        {
-            return AbstractHBCIPassport.getInstance(name, init);
-        }
+//        if (name == null)
+//        {
+//            return AbstractHBCIPassport.getInstance(init);
+//        }
+//        else
+//        {
+//            return AbstractHBCIPassport.getInstance(name, init);
+//        }
+    	return null;
     }
 
 }

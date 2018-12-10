@@ -111,12 +111,12 @@ public final class AnalyzeReportOfTransactions
         HBCIHandler  hbciHandle = null;
 
         // HBCI4Java initialisieren
-        HBCIUtils.init(HBCIUtils.loadPropertiesFile(new FileSystemClassLoader(),"/home/stefan.palme/temp/a.props"),
-                       new MyHBCICallback());
+//        HBCIUtils.init(HBCIUtils.loadPropertiesFile(new FileSystemClassLoader(),"/home/stefan.palme/temp/a.props"),
+//                       new MyHBCICallback());
 
         // Nutzer-Passport initialisieren
         Object passportDescription="Passport für Kontoauszugs-Demo";
-        passport=AbstractHBCIPassport.getInstance(passportDescription);
+        passport=AbstractHBCIPassport.getInstance("PinTan", new MyHBCICallback(), passportDescription);
 
         try {
             // ein HBCI-Handle für einen Nutzer erzeugen
@@ -141,20 +141,20 @@ public final class AnalyzeReportOfTransactions
 
         // Da im main-Thread keine HBCI Aktionen laufen sollen, reicht es hier, die Umgebung
         // nur "notdürftig" zu initialisieren. Leere Konfiguration, und keine Callback-Unterstützung.
-        HBCIUtils.init(new Properties(), new HBCICallbackUnsupported());
+//        HBCIUtils.init(new Properties(), new HBCICallbackUnsupported());
 
         // Die Verwendung der HBCIThreadFactory ist für die korrekte Funktionsweise von HBCI4Java zwingend erforderlich
         // (Alternativ müsste manuell sichergestellt werden, dass jeder Thread in einer eigenen Thread-Gruppe läuft.)
         ExecutorService executor = Executors.newCachedThreadPool(new HBCIThreadFactory());
 
         // Einstellungen für die Aufgabe erstellen
-        Properties properties = HBCIUtils.loadPropertiesFile(new FileSystemClassLoader(),"/home/stefan.palme/temp/a.props");
+//        Properties properties = HBCIUtils.loadPropertiesFile(new FileSystemClassLoader(),"/home/stefan.palme/temp/a.props");
         HBCICallback callback = new MyHBCICallback();
         HBCIPassportFactory passportFactory = new DefaultHBCIPassportFactory((Object) "Passport für Kontoauszugs-Demo");
 
         // Aufgabe implementieren. Die HBCIRunnable übernimmt Initialisierung
         // und Schließen von Passport und Handler automatisch.
-        Runnable runnable = new HBCIRunnable(properties, callback, passportFactory) {
+        Runnable runnable = new HBCIRunnable(new Properties(), callback, passportFactory) {
             @Override
             protected void execute() throws Exception {
 
@@ -174,7 +174,7 @@ public final class AnalyzeReportOfTransactions
         }
 
         // Haupt-Thread beenden
-        HBCIUtils.done();
+//        HBCIUtils.done();
 
     }
 

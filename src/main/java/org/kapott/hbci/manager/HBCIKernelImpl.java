@@ -205,7 +205,7 @@ public final class HBCIKernelImpl implements HBCIKernel
             HBCIPassportInternal mainPassport=passports.getMainPassport();
 
             HBCIUtils.log("generating raw message "+currentMsgName,HBCIUtils.LOG_DEBUG);
-            HBCIUtilsInternal.getCallback().status(mainPassport,HBCICallback.STATUS_MSG_CREATE,currentMsgName);
+            mainPassport.getCallback().status(mainPassport,HBCICallback.STATUS_MSG_CREATE,currentMsgName);
 
             // plaintextnachricht erzeugen
             msg=gen.generate(currentMsgName);
@@ -249,7 +249,7 @@ public final class HBCIKernelImpl implements HBCIKernel
             // wenn nachricht signiert werden soll
             if (signit) {
                 HBCIUtils.log("trying to insert signature",HBCIUtils.LOG_DEBUG);
-                HBCIUtilsInternal.getCallback().status(mainPassport,HBCICallback.STATUS_MSG_SIGN,null);
+                mainPassport.getCallback().status(mainPassport,HBCICallback.STATUS_MSG_SIGN,null);
                 
                 // signatur erzeugen und an nachricht anhängen
                 Sig sig=SigFactory.getInstance().createSig(getParentHandlerData(),msg,passports);
@@ -308,7 +308,7 @@ public final class HBCIKernelImpl implements HBCIKernel
             // soll nachricht verschlüsselt werden?
             if (cryptit) {
                 HBCIUtils.log("trying to encrypt message",HBCIUtils.LOG_DEBUG);
-                HBCIUtilsInternal.getCallback().status(mainPassport,HBCICallback.STATUS_MSG_CRYPT,null);
+                mainPassport.getCallback().status(mainPassport,HBCICallback.STATUS_MSG_CRYPT,null);
                 
                 // nachricht verschlüsseln
                 MSG   old=msg;
@@ -357,7 +357,7 @@ public final class HBCIKernelImpl implements HBCIKernel
             // ist antwortnachricht verschlüsselt?
             boolean crypted=msg.getName().equals("CryptedRes");
             if (crypted) {
-                HBCIUtilsInternal.getCallback().status(mainPassport,HBCICallback.STATUS_MSG_DECRYPT,null);
+            	mainPassport.getCallback().status(mainPassport,HBCICallback.STATUS_MSG_DECRYPT,null);
                 
                 // wenn ja, dann nachricht entschlüsseln
                 HBCIUtils.log("acquire crypt instance",HBCIUtils.LOG_DEBUG);
@@ -367,7 +367,7 @@ public final class HBCIKernelImpl implements HBCIKernel
                     HBCIUtils.log("decrypting using " + crypt,HBCIUtils.LOG_DEBUG);
                     newmsgstring=crypt.decryptIt();
                     HBCIUtils.log("decrypted",HBCIUtils.LOG_DEBUG);
-                    HBCIUtilsInternal.getCallback().status(mainPassport,HBCICallback.STATUS_MSG_RAW_RECV,newmsgstring);
+                    mainPassport.getCallback().status(mainPassport,HBCICallback.STATUS_MSG_RAW_RECV,newmsgstring);
                 } finally {
                     HBCIUtils.log("free crypt",HBCIUtils.LOG_DEBUG);
                     CryptFactory.getInstance().unuseObject(crypt);
@@ -387,7 +387,7 @@ public final class HBCIKernelImpl implements HBCIKernel
                 
                 // nachricht als plaintextnachricht parsen
                 try {
-                    HBCIUtilsInternal.getCallback().status(mainPassport,HBCICallback.STATUS_MSG_PARSE,currentMsgName+"Res");
+                	mainPassport.getCallback().status(mainPassport,HBCICallback.STATUS_MSG_PARSE,currentMsgName+"Res");
                     HBCIUtils.log("message to pe parsed: "+msg.toString(0),HBCIUtils.LOG_DEBUG2);
                     MSG oldMsg=msg;
                     msg=MSGFactory.getInstance().createMSG(currentMsgName+"Res",newmsgstring,newmsgstring.length(),gen);
@@ -400,7 +400,7 @@ public final class HBCIKernelImpl implements HBCIKernel
             }
             else
             {
-              HBCIUtilsInternal.getCallback().status(mainPassport,HBCICallback.STATUS_MSG_RAW_RECV,msg.toString(0));
+            	mainPassport.getCallback().status(mainPassport,HBCICallback.STATUS_MSG_RAW_RECV,msg.toString(0));
             }
             
             HBCIUtils.log("received message after decryption: "+msg.toString(0),HBCIUtils.LOG_DEBUG2);
@@ -448,7 +448,7 @@ public final class HBCIKernelImpl implements HBCIKernel
             
             // überprüfen der signatur
             HBCIUtils.log("looking for a signature",HBCIUtils.LOG_DEBUG);
-            HBCIUtilsInternal.getCallback().status(mainPassport,HBCICallback.STATUS_MSG_VERIFY,null);
+            mainPassport.getCallback().status(mainPassport,HBCICallback.STATUS_MSG_VERIFY,null);
             boolean sigOk=false;
             Sig     sig=SigFactory.getInstance().createSig(getParentHandlerData(),msg,passports);
             try {

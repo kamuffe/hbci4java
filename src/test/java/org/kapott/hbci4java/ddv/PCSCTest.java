@@ -72,11 +72,12 @@ public class PCSCTest extends AbstractTest
   public void beforeCard() throws Exception
   {
     Properties props = new Properties();
-    props.put("client.passport.DDV.path",dir.getAbsolutePath() + "/");
-    props.put("client.passport.DDV.entryidx","1");
-    props.put("log.loglevel.default",Integer.toString(HBCIUtils.LOG_DEBUG2));
-    HBCIUtils.init(props,new HBCICallbackConsole());
-    this.passport = (HBCIPassportDDVPCSC) AbstractHBCIPassport.getInstance("DDVPCSC");
+    HBCIUtils.setParam("client.passport.DDV.path",dir.getAbsolutePath() + "/");
+    HBCIUtils.setParam("client.passport.DDV.entryidx","1");
+    HBCIUtils.setParam("log.loglevel.default",Integer.toString(HBCIUtils.LOG_DEBUG2));
+//    HBCIUtils.init(props);
+
+    this.passport = (HBCIPassportDDVPCSC) AbstractHBCIPassport.getInstance("DDVPCSC",new HBCICallbackConsole());
   }
   
   /**
@@ -93,7 +94,7 @@ public class PCSCTest extends AbstractTest
     }
     finally
     {
-      HBCIUtils.done();
+//      HBCIUtils.done();
     }
   }
   

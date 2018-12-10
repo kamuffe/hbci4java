@@ -87,7 +87,7 @@ public final class INILetter
         
         String header="client.passport."+rdhtype;
         
-        HBCIUtils.init(null,new HBCICallbackConsole());
+//        HBCIUtils.init(null,new HBCICallbackConsole());
         HBCIUtils.setParam(header+".filename",pfilename);
         HBCIUtils.setParam(header+".init","1");
 
@@ -96,7 +96,7 @@ public final class INILetter
             HBCIUtils.setParam(header+".libname",libname);
         }
 
-        passport=AbstractHBCIPassport.getInstance(rdhtype);
+        passport=AbstractHBCIPassport.getInstance(rdhtype,new HBCICallbackConsole());
         org.kapott.hbci.passport.INILetter iniletter=new org.kapott.hbci.passport.INILetter(passport,org.kapott.hbci.passport.INILetter.TYPE_USER);
         
         PrintWriter out=new PrintWriter(new FileWriter(ifilename));

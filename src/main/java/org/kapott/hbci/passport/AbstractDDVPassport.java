@@ -21,6 +21,9 @@
 
 package org.kapott.hbci.passport;
 
+import java.util.Properties;
+
+import org.kapott.hbci.callback.HBCICallback;
 import org.kapott.hbci.comm.Comm;
 import org.kapott.hbci.security.Crypt;
 import org.kapott.hbci.security.Sig;
@@ -28,9 +31,9 @@ import org.kapott.hbci.security.Sig;
 public abstract class AbstractDDVPassport 
     extends AbstractHBCIPassport implements HBCIPassportChipcard
 {
-    protected AbstractDDVPassport(Object init)
+    protected AbstractDDVPassport(HBCICallback callback, Object init)
     {
-        super(init);
+        super(callback, init);
     }
 
     public String getPassportTypeName()

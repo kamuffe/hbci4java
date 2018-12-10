@@ -50,7 +50,7 @@ public class CheckAccountCRC
             System.exit(1);
         }
         
-        HBCIUtils.init(null,new HBCICallbackConsole());
+//        HBCIUtils.init(null,new HBCICallbackConsole());
         
         if (args.length==2) {
         	String blz=args[0];

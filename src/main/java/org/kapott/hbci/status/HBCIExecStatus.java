@@ -214,7 +214,7 @@ public class HBCIExecStatus
     public boolean isOK(String customerId)
     {
         boolean          ok=true;
-        List<Exception>             exc=getExceptions(customerId);
+        List<Exception> exc=getExceptions(customerId);
         HBCIDialogStatus status=getDialogStatus(customerId);
         
         ok&=(exc==null);

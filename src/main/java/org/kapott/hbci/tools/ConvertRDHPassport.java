@@ -68,17 +68,17 @@ public class ConvertRDHPassport
     public static void main(String[] args) 
         throws IOException
     {
-        HBCIUtils.init(null,new HBCICallbackConsole());
+//        HBCIUtils.init(null);
         
         String nameOld=readParam(args,0,"Filename of old RDH passport file");
         HBCIUtils.setParam("client.passport.RDH.filename",nameOld);
         HBCIUtils.setParam("client.passport.RDH.init","1");
-        HBCIPassportInternal passportOld=(HBCIPassportInternal)AbstractHBCIPassport.getInstance("RDH");
+        HBCIPassportInternal passportOld=(HBCIPassportInternal)AbstractHBCIPassport.getInstance("RDH",new HBCICallbackConsole());
         
         String nameNew=readParam(args,1,"Filename of new RDHNew passport file");
         HBCIUtils.setParam("client.passport.RDHNew.filename",nameNew);
         HBCIUtils.setParam("client.passport.RDHNew.init","0");
-        HBCIPassportInternal passportNew=(HBCIPassportInternal)AbstractHBCIPassport.getInstance("RDHNew");
+        HBCIPassportInternal passportNew=(HBCIPassportInternal)AbstractHBCIPassport.getInstance("RDHNew",new HBCICallbackConsole());
 
         passportNew.setBLZ(passportOld.getBLZ());
         passportNew.setCountry(passportOld.getCountry());

@@ -68,8 +68,8 @@ public final class SyntaxCheck
         boolean checkValids=checkValids_st.equals("1");
         
         Properties props=new Properties();
-        props.setProperty("log.loglevel.default", "6");
-        HBCIUtils.init(props,new HBCICallbackConsole());
+        HBCIUtils.setParam("log.loglevel.default", "6");
+//        HBCIUtils.init(props,new HBCICallbackConsole());
         
         FileInputStream fi=new FileInputStream(ifilename);
         byte[]          buffer=new byte[1024];

@@ -24,6 +24,7 @@ package org.kapott.hbci.passport;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.Properties;
 
 import org.kapott.hbci.callback.HBCICallback;
 import org.kapott.hbci.exceptions.HBCI_Exception;
@@ -50,9 +51,9 @@ public class HBCIPassportRDHXFile
     private int      entryIdx;    
     private String   forcedProfileVersion;
     
-    public HBCIPassportRDHXFile(Object init, int dummy)
+    public HBCIPassportRDHXFile(HBCICallback callback, Object init, int dummy)
     {
-        super(init);
+        super(callback, init);
         this.forcedProfileVersion=null;
     }
     
@@ -61,9 +62,9 @@ public class HBCIPassportRDHXFile
         return "RDHXFile";
     }
     
-    public HBCIPassportRDHXFile(Object initObject)
+    public HBCIPassportRDHXFile(HBCICallback callback, Object initObject)
     {
-        this(initObject,0);
+        this( callback, initObject,0);
         setParamHeader("client.passport."+getCompatName());
 
         String fname=HBCIUtils.getParam(getParamHeader()+".filename");
@@ -90,7 +91,7 @@ public class HBCIPassportRDHXFile
             try {
                 if (this.passphrase==null) {
                     StringBuffer retData=new StringBuffer();
-                    HBCIUtilsInternal.getCallback().callback(this,
+                    getCallback().callback(this,
                             HBCICallback.NEED_PASSPHRASE_LOAD,
                             HBCIUtilsInternal.getLocMsg("CALLB_NEED_PASS"),
                             HBCICallback.TYPE_SECRET,
@@ -132,7 +133,7 @@ public class HBCIPassportRDHXFile
                         possibilities.append(";"+hbciAccount.getUserId());
                     }
                     
-                    HBCIUtilsInternal.getCallback().callback(
+                    getCallback().callback(
                         this,
                         HBCICallback.NEED_SIZENTRY_SELECT,
                         "*** select one of the following entries",
@@ -187,7 +188,7 @@ public class HBCIPassportRDHXFile
         try {
             if (this.passphrase == null) {
                 StringBuffer retData = new StringBuffer();
-                HBCIUtilsInternal.getCallback().callback(this,
+                getCallback().callback(this,
                         HBCICallback.NEED_PASSPHRASE_SAVE,
                         HBCIUtilsInternal.getLocMsg("CALLB_NEED_PASS"),
                         HBCICallback.TYPE_SECRET, retData);

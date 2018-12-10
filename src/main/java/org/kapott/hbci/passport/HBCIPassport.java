@@ -23,6 +23,7 @@ package org.kapott.hbci.passport;
 
 import java.util.Properties;
 
+import org.kapott.hbci.callback.HBCICallback;
 import org.kapott.hbci.manager.HBCIKey;
 import org.kapott.hbci.structures.Konto;
 
@@ -402,5 +403,8 @@ public interface HBCIPassport
         @return Objekt, welches mit {@link #setClientData(String,Object)}
         im Passport gespeichert wurde.*/ 
     public Object getClientData(String id);
+    
+	public HBCICallback getCallback();
+
 
 }

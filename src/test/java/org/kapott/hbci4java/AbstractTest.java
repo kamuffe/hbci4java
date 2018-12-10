@@ -51,6 +51,8 @@ public abstract class AbstractTest
    */
   public final static String SYSPROP_PERFORMANCE = "test.performance";
 
+  protected static HBCICallbackConsole callback;
+
   /**
    * Liefert den Inhalt der angegebenen Datei.
    * @param name Dateiname.
@@ -133,7 +135,8 @@ public abstract class AbstractTest
     Properties props = new Properties();
     props.put("log.loglevel.default", "" + HBCIUtils.LOG_DEBUG2);
     props.putAll(System.getProperties());
-    HBCIUtils.init(props, new HBCICallbackConsole());
+//    HBCIUtils.init(props);
+    callback = new HBCICallbackConsole();
     initialized.set(true);
   }
   
@@ -145,6 +148,6 @@ public abstract class AbstractTest
   public static void afterClassAbstractTest() throws Exception
   {
     if (initialized.get())
-      HBCIUtils.done();
+//      HBCIUtils.done();
   }
 }

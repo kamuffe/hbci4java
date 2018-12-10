@@ -8,6 +8,10 @@
 
 package org.kapott.hbci.passport;
 
+import java.util.Properties;
+
+import org.kapott.hbci.callback.HBCICallback;
+
 /**
  * Implementierung eines PIN/TAN-Passport, welcher keine Daten im Dateisystem ablegt
  * sondern alle Daten im Speicher haelt.
@@ -19,9 +23,9 @@ public class HBCIPassportPinTanMemory extends HBCIPassportPinTan
    * ct.
    * @param init Generische Init-Daten.
    */
-  public HBCIPassportPinTanMemory(Object init)
+  public HBCIPassportPinTanMemory(HBCICallback callback, Object init)
   {
-    super(init);
+    super(callback, init);
   }
 
   /**

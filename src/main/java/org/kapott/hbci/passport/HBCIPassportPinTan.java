@@ -79,14 +79,14 @@ public class HBCIPassportPinTan
                                              (byte)0x99,(byte)0xbc,(byte)0xf1,(byte)0x55};
     private final static int CIPHER_ITERATIONS=987;
 
-    public HBCIPassportPinTan(Object init,int dummy)
+    public HBCIPassportPinTan(HBCICallback callback, Object init,int dummy)
     {
-        super(init);
+        super(callback, init);
     }
 
-    public HBCIPassportPinTan(Object initObject)
+    public HBCIPassportPinTan(HBCICallback callback, Object initObject)
     {
-        this(initObject,0);
+        this(callback, initObject,0);
 
         String  header="client.passport.PinTan.";
         String  fname=HBCIUtils.getParam(header+"filename");
@@ -333,7 +333,7 @@ public class HBCIPassportPinTan
             if (getPIN()==null) {
                 StringBuffer s=new StringBuffer();
 
-                HBCIUtilsInternal.getCallback().callback(this,
+                getCallback().callback(this,
                                                  HBCICallback.NEED_PT_PIN,
                                                  HBCIUtilsInternal.getLocMsg("CALLB_NEED_PTPIN"),
                                                  HBCICallback.TYPE_SECRET,
@@ -377,7 +377,7 @@ public class HBCIPassportPinTan
                             StringBuffer s=new StringBuffer();
                             try
                             {
-                                HBCIUtilsInternal.getCallback().callback(this,
+                                getCallback().callback(this,
                                                 HBCICallback.NEED_PT_TAN,
                                                 HBCIUtilsInternal.getLocMsg("CALLB_NEED_PTTAN"),
                                                 HBCICallback.TYPE_TEXT,
@@ -440,7 +440,7 @@ public class HBCIPassportPinTan
                         // Bei PhotoTAN haengen wir ungeparst das HHDuc an. Das kann dann auf
                         // Anwendungsseite per MatrixCode geparst werden
                         payload.append(hhduc);
-                        HBCIUtilsInternal.getCallback().callback(this,HBCICallback.NEED_PT_PHOTOTAN,msg,HBCICallback.TYPE_TEXT,payload);
+                        getCallback().callback(this,HBCICallback.NEED_PT_PHOTOTAN,msg,HBCICallback.TYPE_TEXT,payload);
                     }
                     else
                     {
@@ -449,7 +449,7 @@ public class HBCIPassportPinTan
                         if (flicker != null)
                             payload.append(flicker);
                         
-                        HBCIUtilsInternal.getCallback().callback(this,HBCICallback.NEED_PT_TAN,msg,HBCICallback.TYPE_TEXT,payload);
+                        getCallback().callback(this,HBCICallback.NEED_PT_TAN,msg,HBCICallback.TYPE_TEXT,payload);
                     }
 
                     setPersistentData("externalid",null); // External-ID aus Passport entfernen

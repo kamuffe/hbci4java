@@ -57,7 +57,7 @@ public class ConvertSIZRDHPassport
     public static void main(String[] args) 
         throws IOException
     {
-        HBCIUtils.init(null,new HBCICallbackConsole());
+//        HBCIUtils.init(null);
         HBCIUtils.setParam("log.loglevel.default","5");
         
         String nameOld=readParam(args,0,"Filename of SIZ RDH key file");
@@ -66,12 +66,12 @@ public class ConvertSIZRDHPassport
         HBCIUtils.setParam("client.passport.SIZRDHFile.filename",nameOld);
         HBCIUtils.setParam("client.passport.SIZRDHFile.libname",libname);
         HBCIUtils.setParam("client.passport.SIZRDHFile.init","1");
-        HBCIPassportInternal passportOld=(HBCIPassportInternal)AbstractHBCIPassport.getInstance("SIZRDHFile");
+        HBCIPassportInternal passportOld=(HBCIPassportInternal)AbstractHBCIPassport.getInstance("SIZRDHFile",new HBCICallbackConsole());
         
         String nameNew=readParam(args,2,"Filename of new RDHNew passport file");
         HBCIUtils.setParam("client.passport.RDHNew.filename",nameNew);
         HBCIUtils.setParam("client.passport.RDHNew.init","0");
-        HBCIPassportInternal passportNew=(HBCIPassportInternal)AbstractHBCIPassport.getInstance("RDHNew");
+        HBCIPassportInternal passportNew=(HBCIPassportInternal)AbstractHBCIPassport.getInstance("RDHNew",new HBCICallbackConsole());
 
         passportNew.setBLZ(passportOld.getBLZ());
         passportNew.setCountry(passportOld.getCountry());

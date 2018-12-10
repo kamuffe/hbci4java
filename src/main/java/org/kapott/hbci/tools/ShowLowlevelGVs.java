@@ -93,7 +93,6 @@ public class ShowLowlevelGVs
     public static void main(String[] args)
         throws Exception
     {
-        HBCIUtils.init(null,new HBCICallbackConsole());
         
         String hbciversion;
         if (args.length>=1) {

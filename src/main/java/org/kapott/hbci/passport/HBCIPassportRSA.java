@@ -72,9 +72,9 @@ public class HBCIPassportRSA extends AbstractRDHPassport implements HBCIPassport
      * @param init
      * @param dummy
      */
-    public HBCIPassportRSA(Object init, int dummy)
+    public HBCIPassportRSA(HBCICallback callback, Object init, int dummy)
     {
-        super(init);
+        super(callback, init);
         
         setParamHeader("client.passport.RSA");
         
@@ -90,9 +90,9 @@ public class HBCIPassportRSA extends AbstractRDHPassport implements HBCIPassport
      * ct.
      * @param init
      */
-    public HBCIPassportRSA(Object init)
+    public HBCIPassportRSA(HBCICallback callback, Object init)
     {
-        this(init, 0);
+        this(callback, init, 0);
         
         ObjectInputStream is = null;
         
@@ -110,10 +110,10 @@ public class HBCIPassportRSA extends AbstractRDHPassport implements HBCIPassport
             ////////////////////////////////////////////////////////////////////////
             // init card
             HBCIUtils.log("initializing javax.smartcardio", HBCIUtils.LOG_DEBUG);
-            HBCIUtilsInternal.getCallback().callback(this, HBCICallback.NEED_CHIPCARD, HBCIUtilsInternal.getLocMsg("CALLB_NEED_CHIPCARD"), HBCICallback.TYPE_NONE, null);
+            getCallback().callback(this, HBCICallback.NEED_CHIPCARD, HBCIUtilsInternal.getLocMsg("CALLB_NEED_CHIPCARD"), HBCICallback.TYPE_NONE, null);
             
             initCT();
-            HBCIUtilsInternal.getCallback().callback(this, HBCICallback.HAVE_CHIPCARD, "", HBCICallback.TYPE_NONE, null);
+            getCallback().callback(this, HBCICallback.HAVE_CHIPCARD, "", HBCICallback.TYPE_NONE, null);
             //
             ////////////////////////////////////////////////////////////////////////
             
@@ -747,7 +747,7 @@ public class HBCIPassportRSA extends AbstractRDHPassport implements HBCIPassport
                     
                     if (pin == null || pin.length() == 0) {
                         StringBuffer temppin = new StringBuffer();
-                        HBCIUtilsInternal.getCallback().callback(this,
+                        getCallback().callback(this,
                                                          HBCICallback.NEED_SOFTPIN,
                                                          HBCIUtilsInternal.getLocMsg("CALLB_NEED_SOFTPIN"),
                                                          HBCICallback.TYPE_SECRET,
@@ -760,7 +760,7 @@ public class HBCIPassportRSA extends AbstractRDHPassport implements HBCIPassport
                     
                     setSoftPin(pin.getBytes("ISO-8859-1"));
                 } else {
-                    HBCIUtilsInternal.getCallback().callback(this,
+                    getCallback().callback(this,
                                                      HBCICallback.NEED_HARDPIN,
                                                      HBCIUtilsInternal.getLocMsg("CALLB_NEED_HARDPIN"),
                                                      HBCICallback.TYPE_NONE,
@@ -775,7 +775,7 @@ public class HBCIPassportRSA extends AbstractRDHPassport implements HBCIPassport
                     setSoftPin(new byte[0]);
                 } finally {
                     if (getUseSoftPin() != 1) {
-                        HBCIUtilsInternal.getCallback().callback(this,
+                        getCallback().callback(this,
                                                          HBCICallback.HAVE_HARDPIN,
                                                          null,
                                                          HBCICallback.TYPE_NONE,

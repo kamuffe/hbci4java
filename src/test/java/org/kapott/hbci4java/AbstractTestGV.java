@@ -151,7 +151,7 @@ public abstract class AbstractTestGV
         };
       
         // HBCI4Java initialisieren
-        HBCIUtils.init(props,callback);
+//        HBCIUtils.init(props);
 
         ////////////////////////////////////////////////////////////////////////
         // Nach dem Initialisieren von HBCI4Java noch checken, ob wir den
@@ -167,7 +167,7 @@ public abstract class AbstractTestGV
         //
         ////////////////////////////////////////////////////////////////////////
 
-        this.passport = (HBCIPassportPinTanMemory) AbstractHBCIPassport.getInstance("PinTanMemory");
+        this.passport = (HBCIPassportPinTanMemory) AbstractHBCIPassport.getInstance("PinTan", callback, "PinTanMemory");
       
         // init handler
         this.handler = new HBCIHandler(this.params.getProperty("hbciversion",HBCIVersion.HBCI_300.getId()),this.passport);
@@ -209,7 +209,7 @@ public abstract class AbstractTestGV
         }
         finally
         {
-          HBCIUtils.done();
+//          HBCIUtils.done();
           this.handler = null;
           this.passport = null;
           this.params = null;

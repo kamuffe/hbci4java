@@ -64,7 +64,7 @@ public abstract class HBCIRunnable implements Runnable
 
     private void init()
     {
-        HBCIUtils.initThread(properties, callback);
+//        HBCIUtils.initThread(properties);
     }
 
     private void prepare() throws Exception
@@ -89,7 +89,7 @@ public abstract class HBCIRunnable implements Runnable
         {
             passport.close();
         }
-        HBCIUtils.doneThread();
+//        HBCIUtils.doneThread();
     }
 
 }

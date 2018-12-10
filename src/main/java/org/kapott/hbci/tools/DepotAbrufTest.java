@@ -133,12 +133,11 @@ public final class DepotAbrufTest
         HBCIHandler  hbciHandle = null;
 
         // HBCI4Java initialisieren
-        HBCIUtils.init(HBCIUtils.loadPropertiesFile(new FileSystemClassLoader(),"/home/jonas/java/hbci/jw.hbci4java.properties"),
-                       new MyHBCICallback());
+//        HBCIUtils.init(HBCIUtils.loadPropertiesFile(new FileSystemClassLoader(),"/home/jonas/java/hbci/jw.hbci4java.properties"));
 
         // Nutzer-Passport initialisieren
         Object passportDescription="Passport für Kontoauszugs-Demo";
-        passport=AbstractHBCIPassport.getInstance(passportDescription);
+        passport=AbstractHBCIPassport.getInstance("PinTan",new MyHBCICallback());
         //passport.clearBPD();
 
         try {

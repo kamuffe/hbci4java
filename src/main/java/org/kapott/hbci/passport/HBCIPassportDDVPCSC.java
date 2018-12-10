@@ -57,18 +57,18 @@ public class HBCIPassportDDVPCSC extends HBCIPassportDDV
      * @param init
      * @param dummy
      */
-    public HBCIPassportDDVPCSC(Object init, int dummy)
+    public HBCIPassportDDVPCSC(HBCICallback callback, Object init, int dummy)
     {
-      super(init,dummy);
+      super(callback, init,dummy);
     }
 
     /**
      * ct.
      * @param init
      */
-    public HBCIPassportDDVPCSC(Object init)
+    public HBCIPassportDDVPCSC(HBCICallback callback, Object init)
     {
-      this(init,0);
+      this(callback, init,0);
       
       ObjectInputStream is = null;
       
@@ -87,10 +87,10 @@ public class HBCIPassportDDVPCSC extends HBCIPassportDDV
         ////////////////////////////////////////////////////////////////////////
         // init card
         HBCIUtils.log("initializing javax.smartcardio",HBCIUtils.LOG_DEBUG);
-        HBCIUtilsInternal.getCallback().callback(this,HBCICallback.NEED_CHIPCARD,HBCIUtilsInternal.getLocMsg("CALLB_NEED_CHIPCARD"),HBCICallback.TYPE_NONE,null);
+        getCallback().callback(this,HBCICallback.NEED_CHIPCARD,HBCIUtilsInternal.getLocMsg("CALLB_NEED_CHIPCARD"),HBCICallback.TYPE_NONE,null);
         
         this.initCT();
-        HBCIUtilsInternal.getCallback().callback(this,HBCICallback.HAVE_CHIPCARD,"",HBCICallback.TYPE_NONE,null);
+        getCallback().callback(this,HBCICallback.HAVE_CHIPCARD,"",HBCICallback.TYPE_NONE,null);
         //
         ////////////////////////////////////////////////////////////////////////
         

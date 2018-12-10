@@ -95,7 +95,7 @@ public class CollectHashCodes
     public static void main(String[] args)
         throws Exception
     {
-        HBCIUtils.init(null,new MyCallback());
+//        HBCIUtils.init(null);
         
         Properties blzs=new Properties();
         InputStream fin=new FileInputStream("src/blz.properties");
@@ -124,7 +124,7 @@ public class CollectHashCodes
         data.setProperty("blz",blz);
         data.setProperty("host",HBCIUtils.getHBCIHostForBLZ(blz));
         
-        HBCIPassportInternal passport=(HBCIPassportInternal)AbstractHBCIPassport.getInstance("RDHNew",data);
+        HBCIPassportInternal passport=(HBCIPassportInternal)AbstractHBCIPassport.getInstance("RDHNew", new MyCallback(), data);
         HBCIKernelImpl       kernel=(HBCIKernelImpl)HBCIKernelFactory.getKernel(null,"210");
         HBCIInstitute inst=new HBCIInstitute(kernel,passport,true);
         

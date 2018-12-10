@@ -38,11 +38,11 @@ import org.kapott.hbci.passport.HBCIPassport;
 public class HBCIUtilsInternal
 {
 
-    public static Properties blzs;
-    public static Map<String,BankInfo> banks = null;
-    public static Hashtable<ThreadGroup, HBCICallback>  callbacks;  // threadgroup->callbackObject
-    public static Hashtable<ThreadGroup, ResourceBundle>  locMsgs;    // threadgroup->resourceBundle
-    public static Hashtable<ThreadGroup, Locale>  locales;    // threadgroup->Locale
+    
+    
+//    public static Hashtable<ThreadGroup, HBCICallback>  callbacks;  // threadgroup->callbackObject
+    public static ResourceBundle  locMsgs;    // threadgroup->resourceBundle
+//    public static Hashtable<ThreadGroup, Locale>  locales;    // threadgroup->Locale
     
     public static String bigDecimal2String(BigDecimal value)
     {
@@ -52,17 +52,6 @@ public class HBCIUtilsInternal
         format.setDecimalFormatSymbols(symbols);
         format.setDecimalSeparatorAlwaysShown(false);
         return format.format(value);
-    }
-
-    /**
-     * Liefert die Zeile aus der blz.properties mit der angegebenen BLZ.
-     * @param blz die BLZ.
-     * @return die Zeile aus der blz.properties
-     * @deprecated Bitte {@link HBCIUtils#getBankInfo(String)} verwenden.
-     */
-    public static String getBLZData(String blz)
-    {
-        return blz!=null?blzs.getProperty(blz,"|||||"):"|||||";
     }
 
     /**
@@ -86,31 +75,14 @@ public class HBCIUtilsInternal
         return ret;
     }
     
-    /**
-     * Liefert das Pruefziffern-Verfahren fuer diese Bank.
-     * @param blz die BLZ.
-     * @return das Pruefziffern-Verfahren fuer diese Bank.
-     */
-    public static String getAlgForBLZ(String blz)
-    {
-        BankInfo info = banks.get(blz);
-        if (info == null)
-            return "";
-        return info.getChecksumMethod() != null ? info.getChecksumMethod() : "";
-    }
 
-    public static HBCICallback getCallback()
-    {
-        ThreadGroup group=Thread.currentThread().getThreadGroup();
-        return callbacks.get(group);
-    }
     
     public static String getLocMsg(String key)
     {
-        ThreadGroup group=Thread.currentThread().getThreadGroup();
+
         try
         {
-            return locMsgs.get(group).getString(key);
+            return locMsgs.getString(key);
         }
         catch (MissingResourceException re)
         {
@@ -141,7 +113,7 @@ public class HBCIUtilsInternal
             ret=true;
         } else if (paramValue.equals("callback")) {
             StringBuffer sb=new StringBuffer();
-            getCallback().callback(passport,
+            passport.getCallback().callback(passport,
                                    HBCICallback.HAVE_ERROR,
                                    msg,
                                    HBCICallback.TYPE_BOOLEAN,

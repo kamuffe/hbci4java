@@ -21,7 +21,11 @@
 
 package org.kapott.hbci.passport;
 
+import java.util.Properties;
+
 import javax.crypto.SecretKey;
+
+import org.kapott.hbci.callback.HBCICallback;
 
 public abstract class AbstractRDHSWFileBasedPassport 
 	extends AbstractRDHSWPassport 
@@ -33,8 +37,8 @@ public abstract class AbstractRDHSWFileBasedPassport
                                                (byte)0x99,(byte)0xbc,(byte)0xf1,(byte)0x55};
     protected final static int CIPHER_ITERATIONS=987;
 
-    protected AbstractRDHSWFileBasedPassport(Object init) {
-        super(init);
+    protected AbstractRDHSWFileBasedPassport(HBCICallback callback, Object init) {
+        super(callback, init);
     }
 
     public String getFilename() {

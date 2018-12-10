@@ -70,9 +70,9 @@ public abstract class AbstractPinTanPassport
 
     private String    pin;
 
-    public AbstractPinTanPassport(Object initObject)
+    public AbstractPinTanPassport(HBCICallback callback, Object initObject)
     {
-        super(initObject);
+        super(callback, initObject);
         this.twostepMechanisms=new Hashtable<String, Properties>();
         this.allowedTwostepMechanisms=new ArrayList<String>();
     }
@@ -215,7 +215,7 @@ public abstract class AbstractPinTanPassport
                     // Aufrufer informieren, dass UserID und CustomerID geändert wurde
                     StringBuffer retData=new StringBuffer();
                     retData.append(newUserId+"|"+newCustomerId);
-                    HBCIUtilsInternal.getCallback().callback(this,HBCICallback.USERID_CHANGED,"*** User ID changed",HBCICallback.TYPE_TEXT,retData);
+                    getCallback().callback(this,HBCICallback.USERID_CHANGED,"*** User ID changed",HBCICallback.TYPE_TEXT,retData);
                     return true;                    
                 }
             }
@@ -236,7 +236,7 @@ public abstract class AbstractPinTanPassport
                 
                 // Aufrufer informieren, dass falsche PIN eingegeben wurde (um evtl. PIN aus Puffer zu löschen, etc.) 
                 StringBuffer retData=new StringBuffer();
-                HBCIUtilsInternal.getCallback().callback(this,HBCICallback.WRONG_PIN,"*** invalid PIN entered",HBCICallback.TYPE_TEXT,retData);
+                getCallback().callback(this,HBCICallback.WRONG_PIN,"*** invalid PIN entered",HBCICallback.TYPE_TEXT,retData);
             }
         }
             
@@ -502,7 +502,7 @@ public abstract class AbstractPinTanPassport
                         }
                         
                         // callback erzeugen
-                        HBCIUtilsInternal.getCallback().callback(this,
+                        getCallback().callback(this,
                             HBCICallback.NEED_PT_SECMECH,
                             "*** Select a pintan method from the list",
                             HBCICallback.TYPE_TEXT,
@@ -1238,7 +1238,7 @@ public abstract class AbstractPinTanPassport
 
           StringBuffer retData=new StringBuffer();
           retData.append(this.getUPD().getProperty("tanmedia.names",""));
-          HBCIUtilsInternal.getCallback().callback(this,HBCICallback.NEED_PT_TANMEDIA,
+          getCallback().callback(this,HBCICallback.NEED_PT_TANMEDIA,
               "*** Enter the name of your TAN media",
               HBCICallback.TYPE_TEXT,
               retData);

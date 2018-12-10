@@ -103,9 +103,9 @@ public class HBCIPassportDDV
                                                (byte)0x1f,(byte)0xe3,(byte)0x73,(byte)0xcc};
     protected final static int CIPHER_ITERATIONS=987;
 
-    public HBCIPassportDDV(Object init,int dummy)
+    public HBCIPassportDDV(HBCICallback callback, Object init, int dummy)
     {
-        super(init);
+        super(callback, init);
         setParamHeader("client.passport.DDV");
         
         keys=new HBCIKey[2];
@@ -114,9 +114,9 @@ public class HBCIPassportDDV
         }
     }
 
-    public HBCIPassportDDV(Object init)
+    public HBCIPassportDDV(HBCICallback callback, Object init)
     {
-        this(init,0);
+        this( callback, init,0);
 
         // get ddv-parameters
         String path=HBCIUtils.getParam(paramHeader+".path","./");
@@ -145,7 +145,7 @@ public class HBCIPassportDDV
         HBCIUtils.log("using chipcard terminal with port "+comport+" and terminal number "+ctnumber,
                       HBCIUtils.LOG_DEBUG);
         try {
-            HBCIUtilsInternal.getCallback().callback(this,
+            getCallback().callback(this,
                                              HBCICallback.NEED_CHIPCARD,
                                              HBCIUtilsInternal.getLocMsg("CALLB_NEED_CHIPCARD"),
                                              HBCICallback.TYPE_NONE,
@@ -160,7 +160,7 @@ public class HBCIPassportDDV
 
             throw new HBCI_Exception(HBCIUtilsInternal.getLocMsg("EXCMSG_CTERR"),e);
         } finally {
-            HBCIUtilsInternal.getCallback().callback(this,
+            getCallback().callback(this,
                                              HBCICallback.HAVE_CHIPCARD,
                                              "",
                                              HBCICallback.TYPE_NONE,
@@ -573,7 +573,7 @@ public class HBCIPassportDDV
 
                     if (pin==null || pin.length()==0) {
                         StringBuffer temppin=new StringBuffer();
-                        HBCIUtilsInternal.getCallback().callback(this,
+                        getCallback().callback(this,
                                                          HBCICallback.NEED_SOFTPIN,
                                                          HBCIUtilsInternal.getLocMsg("CALLB_NEED_SOFTPIN"),
                                                          HBCICallback.TYPE_SECRET,
@@ -586,7 +586,7 @@ public class HBCIPassportDDV
 
                     setSoftPin(pin.getBytes("ISO-8859-1"));
                 } else {
-                    HBCIUtilsInternal.getCallback().callback(this,
+                    getCallback().callback(this,
                                                      HBCICallback.NEED_HARDPIN,
                                                      HBCIUtilsInternal.getLocMsg("CALLB_NEED_HARDPIN"),
                                                      HBCICallback.TYPE_NONE,
@@ -601,7 +601,7 @@ public class HBCIPassportDDV
                     setSoftPin(new byte[0]);
                 } finally {
                     if (useSoftPin!=1) {
-                        HBCIUtilsInternal.getCallback().callback(this,
+                        getCallback().callback(this,
                                                          HBCICallback.HAVE_HARDPIN,
                                                          null,
                                                          HBCICallback.TYPE_NONE,

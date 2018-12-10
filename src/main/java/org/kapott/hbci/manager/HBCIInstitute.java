@@ -90,7 +90,7 @@ public final class HBCIInstitute
             p.setProperty(BPD_KEY_LASTUPDATE,String.valueOf(System.currentTimeMillis()));
             passport.setBPD(p);
             HBCIUtils.log("installed new BPD with version "+passport.getBPDVersion(),HBCIUtils.LOG_INFO);
-            HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_INST_BPD_INIT_DONE,passport.getBPD());
+            passport.getCallback().status(passport,HBCICallback.STATUS_INST_BPD_INIT_DONE,passport.getBPD());
         }
     }
 
@@ -144,7 +144,7 @@ public final class HBCIInstitute
         }
         
         if (foundChanges) {
-            HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_INST_GET_KEYS_DONE,null);
+        	passport.getCallback().status(passport,HBCICallback.STATUS_INST_GET_KEYS_DONE,null);
             acknowledgeNewKeys();
         }
     }
@@ -152,7 +152,7 @@ public final class HBCIInstitute
     private void acknowledgeNewKeys()
     {
         StringBuffer answer=new StringBuffer();
-        HBCIUtilsInternal.getCallback().callback(passport,
+        passport.getCallback().callback(passport,
                                          HBCICallback.NEED_NEW_INST_KEYS_ACK,
                                          HBCIUtilsInternal.getLocMsg("CALLB_NEW_INST_KEYS"),
                                          HBCICallback.TYPE_BOOLEAN,
@@ -173,7 +173,7 @@ public final class HBCIInstitute
 
     private void doDialogEnd(String dialogid,boolean needSig)
     {
-        HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_DIALOG_END,null);
+    	passport.getCallback().status(passport,HBCICallback.STATUS_DIALOG_END,null);
         
         kernel.rawNewMsg("DialogEndAnon");
         kernel.rawSet("MsgHead.dialogid",dialogid);
@@ -181,7 +181,7 @@ public final class HBCIInstitute
         kernel.rawSet("DialogEndS.dialogid",dialogid);
         kernel.rawSet("MsgTail.msgnum","2");
         HBCIMsgStatus status=kernel.rawDoIt(HBCIKernelImpl.DONT_SIGNIT,HBCIKernelImpl.DONT_CRYPTIT,needSig,HBCIKernelImpl.DONT_NEED_CRYPT);
-        HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_DIALOG_END_DONE,status);
+        passport.getCallback().status(passport,HBCICallback.STATUS_DIALOG_END_DONE,status);
         
         if (!status.isOK()) {
             HBCIUtils.log("dialog end failed: "+status.getErrorString(),HBCIUtils.LOG_ERR);
@@ -283,7 +283,7 @@ public final class HBCIInstitute
                     passport.saveChanges();
                 }
                 
-                HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_INST_BPD_INIT,null);
+                passport.getCallback().status(passport,HBCICallback.STATUS_INST_BPD_INIT,null);
                 HBCIUtils.log("fetching BPD",HBCIUtils.LOG_INFO);
                 
                 HBCIMsgStatus status=null;
@@ -373,7 +373,7 @@ public final class HBCIInstitute
             // *immer* true zurückgibt
             
             try {
-                HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_INST_GET_KEYS,null);
+            	passport.getCallback().status(passport,HBCICallback.STATUS_INST_GET_KEYS,null);
                 HBCIUtils.log("fetching institute keys",HBCIUtils.LOG_INFO);
                 
                 String country=passport.getCountry();

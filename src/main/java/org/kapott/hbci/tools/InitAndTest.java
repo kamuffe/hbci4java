@@ -79,11 +79,11 @@ public final class InitAndTest
         throws IOException
     {
         try {
-            HBCIUtils.init(null,new MyCallback());
+//            HBCIUtils.init(null,new MyCallback());
             readBasicParams();
 
             readPassportParams();
-            passport=AbstractHBCIPassport.getInstance();
+            passport=AbstractHBCIPassport.getInstance("PinTan", new MyCallback());
 
             readHBCIVersion();
             readActions();
