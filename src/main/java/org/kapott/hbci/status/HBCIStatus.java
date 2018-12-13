@@ -322,13 +322,52 @@ public final class HBCIStatus
 	 * 
 	 * @return String mit allen gespeicherten Status-Informationen
 	 */
+	public String toStringDebug()
+	{
+		StringBuilder sb = new StringBuilder();
+
+		for ( Exception ex : exceptions )
+		{
+			sb.append( HBCIUtils.exception2StringShort( ex ) );
+			sb.append( System.lineSeparator() );
+		}
+
+		HBCIRetVal[] errList = getErrors();
+		for ( int i = 0; i < errList.length; i++ )
+		{
+			sb.append( errList[i].toStringDebug() );
+			sb.append( System.lineSeparator() );
+		}
+
+		HBCIRetVal[] warnList = getWarnings();
+		for ( int i = 0; i < warnList.length; i++ )
+		{
+			sb.append( warnList[i].toStringDebug() );
+			sb.append( System.lineSeparator() );
+		}
+
+		HBCIRetVal[] succList = getSuccess();
+		for ( int i = 0; i < succList.length; i++ )
+		{
+			sb.append( succList[i].toStringDebug() );
+			sb.append( System.lineSeparator() );
+		}
+
+		return sb.toString().trim();
+	}
+	
+	/**
+	 * Gibt die Status-Informationen aller enthaltenen Exceptions und
+	 * HBCI-Rückgabewerte als ein String zurück.
+	 * 
+	 * @return String mit allen gespeicherten Status-Informationen
+	 */
 	public String toString()
 	{
 		StringBuilder sb = new StringBuilder();
 
-		for ( Iterator<Exception> i = exceptions.iterator(); i.hasNext(); )
+		for ( Exception ex : exceptions )
 		{
-			Exception ex = i.next();
 			sb.append( HBCIUtils.exception2StringShort( ex ) );
 			sb.append( System.lineSeparator() );
 		}
@@ -351,47 +390,6 @@ public final class HBCIStatus
 		for ( int i = 0; i < succList.length; i++ )
 		{
 			sb.append( succList[i].toString() );
-			sb.append( System.lineSeparator() );
-		}
-
-		return sb.toString().trim();
-	}
-	
-	/**
-	 * Gibt die Status-Informationen aller enthaltenen Exceptions und
-	 * HBCI-Rückgabewerte als ein String zurück.
-	 * 
-	 * @return String mit allen gespeicherten Status-Informationen
-	 */
-	public String toString1()
-	{
-		StringBuilder sb = new StringBuilder();
-
-		for ( Iterator<Exception> i = exceptions.iterator(); i.hasNext(); )
-		{
-			Exception ex = i.next();
-			sb.append( HBCIUtils.exception2StringShort( ex ) );
-			sb.append( System.lineSeparator() );
-		}
-
-		HBCIRetVal[] errList = getErrors();
-		for ( int i = 0; i < errList.length; i++ )
-		{
-			sb.append( errList[i].toString1() );
-			sb.append( System.lineSeparator() );
-		}
-
-		HBCIRetVal[] warnList = getWarnings();
-		for ( int i = 0; i < warnList.length; i++ )
-		{
-			sb.append( warnList[i].toString1() );
-			sb.append( System.lineSeparator() );
-		}
-
-		HBCIRetVal[] succList = getSuccess();
-		for ( int i = 0; i < succList.length; i++ )
-		{
-			sb.append( succList[i].toString1() );
 			sb.append( System.lineSeparator() );
 		}
 

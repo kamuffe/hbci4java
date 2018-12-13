@@ -515,7 +515,7 @@ public final class HBCIHandler
 			while ( !dialogs.isEmpty() )
 			{
 				String customerid = dialogs.keySet().iterator().next();
-				logger.debug( "executing dialog for customerid " + customerid );
+				logger.debug( "executing dialog for customerid {}", customerid );
 				passport.setCustomerId( customerid );
 
 				try

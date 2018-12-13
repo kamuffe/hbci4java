@@ -226,7 +226,7 @@ public final class HBCIKernelImpl
 
 			// liste der rewriter erzeugen
 			String rewriters_st = HBCIUtils.getParam( "kernel.rewriter" );
-			ArrayList<Rewrite> al = new ArrayList<Rewrite>();
+			ArrayList<Rewrite> rewriters = new ArrayList<>();
 			StringTokenizer tok = new StringTokenizer( rewriters_st, "," );
 			while ( tok.hasMoreTokens() )
 			{
@@ -237,16 +237,15 @@ public final class HBCIKernelImpl
 							rewriterName );
 					Constructor con = cl.getConstructor( (Class[]) null );
 					Rewrite rewriter = (Rewrite) (con.newInstance( (Object[]) null ));
-					al.add( rewriter );
+					rewriters.add( rewriter );
 				}
 			}
-			Rewrite[] rewriters = al.toArray( new Rewrite[al.size()] );
 
 			// alle rewriter durchlaufen und plaintextnachricht patchen
-			for ( int i = 0; i < rewriters.length; i++ )
+			for ( Rewrite rewrite : rewriters )
 			{
 				MSG old = msg;
-				msg = rewriters[i].outgoingClearText( old, gen );
+				msg = rewrite.outgoingClearText( old, gen );
 				if ( msg != old )
 				{
 					MSGFactory.getInstance().unuseObject( old );
@@ -280,10 +279,10 @@ public final class HBCIKernelImpl
 				}
 
 				// alle rewrites erledigen, die *nach* dem hinzufügen der signatur stattfinden müssen
-				for ( int i = 0; i < rewriters.length; i++ )
+				for ( Rewrite rewrite : rewriters )
 				{
 					MSG old = msg;
-					msg = rewriters[i].outgoingSigned( old, gen );
+					msg = rewrite.outgoingSigned( old, gen );
 					if ( msg != old )
 					{
 						MSGFactory.getInstance().unuseObject( old );
@@ -358,17 +357,17 @@ public final class HBCIKernelImpl
 				}
 
 				// verschlüsselte nachricht patchen
-				for ( int i = 0; i < rewriters.length; i++ )
+				for ( Rewrite rewrite : rewriters )
 				{
 					MSG oldMsg = msg;
-					msg = rewriters[i].outgoingCrypted( oldMsg, gen );
+					msg = rewrite.outgoingCrypted( oldMsg, gen );
 					if ( msg != oldMsg )
 					{
 						MSGFactory.getInstance().unuseObject( oldMsg );
 					}
 				}
 
-				logger.debug( "encrypted message to be sent: " + msg.toString( 0 ) );
+				logger.debug( "encrypted message to be sent: {}", msg.toString( 0 ) );
 			}
 
 			// basic-values der ausgehenden nachricht merken
@@ -413,20 +412,20 @@ public final class HBCIKernelImpl
 
 				// alle patches für die unverschlüsselte nachricht durchlaufen
 				logger.debug( "rewriting message" );
-				for ( int i = 0; i < rewriters.length; i++ )
+				for ( Rewrite rewrite : rewriters )
 				{
-					logger.debug( "applying rewriter " + rewriters[i].getClass().getSimpleName() );
-					newmsgstring = rewriters[i].incomingClearText( newmsgstring, gen );
+					logger.debug( "applying rewriter {}", rewrite.getClass().getSimpleName() );
+					newmsgstring = rewrite.incomingClearText( newmsgstring, gen );
 				}
 				logger.debug( "rewriting done" );
 
-				logger.debug( "decrypted message after rewriting: " + newmsgstring );
+				logger.debug( "decrypted message after rewriting: {}", newmsgstring );
 
 				// nachricht als plaintextnachricht parsen
 				try
 				{
 					mainPassport.getCallback().status( mainPassport, HBCICallback.STATUS_MSG_PARSE, currentMsgName + "Res" );
-					logger.debug( "message to pe parsed: " + msg.toString( 0 ) );
+					logger.debug( "message to pe parsed: {}", msg.toString( 0 ) );
 					MSG oldMsg = msg;
 					msg = MSGFactory.getInstance().createMSG( currentMsgName + "Res", newmsgstring, newmsgstring.length(), gen );
 					if ( msg != oldMsg )
@@ -444,13 +443,13 @@ public final class HBCIKernelImpl
 				mainPassport.getCallback().status( mainPassport, HBCICallback.STATUS_MSG_RAW_RECV, msg.toString( 0 ) );
 			}
 
-			logger.debug( "received message after decryption: " + msg.toString( 0 ) );
+			logger.debug( "received message after decryption: {}", msg.toString( 0 ) );
 
 			// alle patches für die plaintextnachricht durchlaufen
-			for ( int i = 0; i < rewriters.length; i++ )
+			for ( Rewrite rewrite : rewriters )
 			{
 				MSG oldMsg = msg;
-				msg = rewriters[i].incomingData( oldMsg, gen );
+				msg = rewrite.incomingData( oldMsg, gen );
 				if ( msg != oldMsg )
 				{
 					MSGFactory.getInstance().unuseObject( oldMsg );

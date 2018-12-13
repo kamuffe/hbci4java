@@ -35,8 +35,8 @@ import org.kapott.hbci.status.HBCIMsgStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/*
- * @brief A class for managing exactly one HBCI-Dialog
+/**
+ * A class for managing exactly one HBCI-Dialog
  * A HBCI-Dialog consists of a number of HBCI-messages. These
  * messages will be sent (and the responses received) one
  * after the other, without timegaps between them (to avoid
@@ -59,16 +59,30 @@ public final class HBCIDialog
 
 	private boolean isAnon;
 	private String anonSuffix;
-	private String dialogid; /* The dialogID for this dialog (unique for each dialog) */
-	private long msgnum; /* An automatically managed message counter. */
-	private List<ArrayList<HBCIJobImpl>> msgs; /*
-												 * this array contains all messages to be sent (excluding
-												 * dialogInit and dialogEnd); each element of the arrayList
-												 * is again an ArrayList, where each element is one
-												 * task (GV) to be sent with this specific message
-												 */
-	private Properties listOfGVs; // liste aller GVs in der aktuellen msg; key ist der hbciCode des jobs,
-									// value ist die anzahl dieses jobs in der aktuellen msg
+
+	/**
+	 * The dialogID for this dialog (unique for each dialog)
+	 */
+	private String dialogid;
+
+	/**
+	 * An automatically managed message counter.
+	 */
+	private long msgnum;
+
+	/**
+	 * this array contains all messages to be sent (excluding
+	 * dialogInit and dialogEnd); each element of the arrayList
+	 * is again an ArrayList, where each element is one
+	 * task (GV) to be sent with this specific message
+	 */
+	private List<ArrayList<HBCIJobImpl>> msgs;
+
+	/**
+	 * liste aller GVs in der aktuellen msg; key ist der hbciCode des jobs, value ist die anzahl dieses jobs in der aktuellen msg
+	 */
+	private Properties listOfGVs;
+	
 	private HBCIHandler parentHandler;
 
 	public HBCIDialog( HBCIHandler parentHandler )
@@ -109,7 +123,7 @@ public final class HBCIDialog
 			// autosecmech
 			logger.debug( "checking whether passport is supported (but ignoring result)" );
 			boolean s = mainPassport.isSupported();
-			logger.debug( "passport supported: " + s );
+			logger.debug( "passport supported: {}", s );
 
 			logger.info( HBCIUtils.getLocMsg( "STATUS_DIALOG_INIT" ) );
 			parentHandler.getPassport().getCallback().status( mainPassport, HBCICallback.STATUS_DIALOG_INIT, null );
@@ -476,7 +490,7 @@ public final class HBCIDialog
 		{
 			dialogid = null;
 			msgnum = 1;
-			msgs = new ArrayList<ArrayList<HBCIJobImpl>>();
+			msgs = new ArrayList<>();
 			msgs.add( new ArrayList<HBCIJobImpl>() );
 			listOfGVs.clear();
 		}

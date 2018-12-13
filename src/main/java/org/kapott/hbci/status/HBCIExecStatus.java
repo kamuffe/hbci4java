@@ -220,7 +220,8 @@ public class HBCIExecStatus
 		HBCIDialogStatus status = getDialogStatus( customerId );
 		if ( status != null )
 		{
-			sb.append( status.toString() + System.lineSeparator() );
+			sb.append( status.toString() );
+			sb.append( System.lineSeparator() );
 		}
 
 		return sb.toString().trim();
@@ -255,7 +256,7 @@ public class HBCIExecStatus
 		List<Exception> exc = getExceptions( customerId );
 		HBCIDialogStatus status = getDialogStatus( customerId );
 
-		ok &= (exc == null);
+		ok &= (exc.isEmpty());
 		ok &= (status != null);
 		ok &= status.isOK();
 

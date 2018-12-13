@@ -235,12 +235,12 @@ public final class HBCIMsgStatus
 	 * 
 	 * @return einen String, der alle Status-Informationen zu einer Nachricht enthält
 	 */
-	public String toString()
+	public String toStringDebug()
 	{
 		StringBuilder ret = new StringBuilder();
-		ret.append( globStatus.toString() );
+		ret.append( globStatus.toStringDebug() );
 		ret.append( System.lineSeparator() );
-		ret.append( segStatus.toString() );
+		ret.append( segStatus.toStringDebug() );
 		return ret.toString().trim();
 	}
 	
@@ -255,12 +255,12 @@ public final class HBCIMsgStatus
 	 * 
 	 * @return einen String, der alle Status-Informationen zu einer Nachricht enthält
 	 */
-	public String toString1()
+	public String toString()
 	{
 		StringBuilder ret = new StringBuilder();
-		ret.append( globStatus.toString1() );
+		ret.append( globStatus.toString() );
 		ret.append( System.lineSeparator() );
-		ret.append( segStatus.toString1() );
+		ret.append( segStatus.toString() );
 		return ret.toString().trim();
 	}
 

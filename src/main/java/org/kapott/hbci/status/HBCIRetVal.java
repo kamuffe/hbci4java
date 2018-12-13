@@ -155,7 +155,7 @@ public final class HBCIRetVal
 	 * @return einen String, der alle Informationen dieses Objektes kurz
 	 *         zusammenfasst.
 	 */
-	public String toString()
+	public String toStringDebug()
 	{
 		StringBuilder ret = new StringBuilder();
 		ret.append( code ).append( ":" ).append( text );
@@ -194,7 +194,7 @@ public final class HBCIRetVal
 	 * @return einen String, der alle Informationen dieses Objektes kurz
 	 *         zusammenfasst.
 	 */
-	public String toString1()
+	public String toString()
 	{
 		StringBuilder sb = new StringBuilder();
 		sb.append( text );

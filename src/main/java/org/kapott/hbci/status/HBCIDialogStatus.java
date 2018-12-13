@@ -289,14 +289,14 @@ public final class HBCIDialogStatus
 	 * @return einen String, der die kompletten Status-Informationen für einen
 	 *         Dialog enthält
 	 */
-	public String toString()
+	public String toStringDebug()
 	{
 		StringBuilder sb = new StringBuilder();
 
 		sb.append( HBCIUtils.getLocMsg( "STAT_INIT" ) ).append( ":" ).append( System.lineSeparator() );
 		if ( initStatus != null )
 		{
-			sb.append( initStatus.toString() );
+			sb.append( initStatus.toStringDebug() );
 		}
 		else
 		{
@@ -309,7 +309,7 @@ public final class HBCIDialogStatus
 			for ( int i = 0; i < msgStatus.length; i++ )
 			{
 				sb.append( HBCIUtils.getLocMsg( "STAT_MSG" ) ).append( " #" ).append( i + 1 ).append( ":" ).append( System.lineSeparator() );
-				sb.append( msgStatus[i].toString() );
+				sb.append( msgStatus[i].toStringDebug() );
 				sb.append( System.lineSeparator() );
 			}
 		}
@@ -317,7 +317,7 @@ public final class HBCIDialogStatus
 		sb.append( HBCIUtils.getLocMsg( "STAT_END" ) ).append( ":" ).append( System.lineSeparator() );
 		if ( endStatus != null )
 		{
-			sb.append( endStatus.toString() );
+			sb.append( endStatus.toStringDebug() );
 		}
 		else
 		{
@@ -337,14 +337,13 @@ public final class HBCIDialogStatus
 	 * @return einen String, der die kompletten Status-Informationen für einen
 	 *         Dialog enthält
 	 */
-	public String toString1()
+	public String toString()
 	{
 		StringBuilder sb = new StringBuilder();
 
 		if ( initStatus != null )
 		{
-			sb.append( HBCIUtils.getLocMsg( "STAT_INIT" ) ).append( ":" ).append( System.lineSeparator() );
-			sb.append( initStatus.toString1() );
+			sb.append( initStatus.toString() );
 		}
 		sb.append( System.lineSeparator() );
 		sb.append( System.lineSeparator() );
@@ -354,7 +353,7 @@ public final class HBCIDialogStatus
 			for ( int i = 0; i < msgStatus.length; i++ )
 			{
 				sb.append( HBCIUtils.getLocMsg( "STAT_MSG" ) ).append( " #" ).append( i + 1 ).append( ":" ).append( System.lineSeparator() );
-				sb.append( msgStatus[i].toString1() );
+				sb.append( msgStatus[i].toString() );
 				sb.append( System.lineSeparator() );
 				sb.append( System.lineSeparator() );
 			}
@@ -362,8 +361,7 @@ public final class HBCIDialogStatus
 
 		if ( endStatus != null )
 		{
-			sb.append( HBCIUtils.getLocMsg( "STAT_END" ) ).append( ":" ).append( System.lineSeparator() );
-			sb.append( endStatus.toString1() );
+			sb.append( endStatus.toString() );
 		}
 		sb.append( System.lineSeparator() );
 
