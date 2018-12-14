@@ -25,17 +25,14 @@ import java.util.List;
 import org.kapott.hbci.manager.HBCIUtils;
 
 /**
- * <p>
  * Status-Informationen für einen kompletten HBCI-Dialog. Objekte
  * dieser Klasse werden von {@link HBCIExecStatus}-Objekten verwaltet.
  * In einem <code>HBCIDialogStatus</code> werden alle Status-Informationen
  * gespeichert, die während der Ausführung eines HBCI-Dialoges anfallen.
- * </p>
  * <p>
  * Die direkte Auswertung der Felder dieser Klasse ist i.d.R. nicht zu empfehlen.
  * Statt dessen sollten die bereitgestellten Methoden benutzt werden, um alle
  * relevanten Informationen zu extrahieren.
- * </p>
  */
 public final class HBCIDialogStatus
 {
@@ -44,7 +41,7 @@ public final class HBCIDialogStatus
 	 * Feld werden alle Status-Informationen gespeichert, die die
 	 * Dialog-Initialisierung betreffen.
 	 */
-	public HBCIMsgStatus initStatus;
+	private HBCIMsgStatus initStatus;
 
 	/**
 	 * Status-Informationen zu den einzelnen Nachrichten zwischen
@@ -63,47 +60,48 @@ public final class HBCIDialogStatus
 	 * Geschäftsvorfall passende Nachrichtennummer zu ermitteln, um damit
 	 * das entsprechende Element aus diesem Array zu extrahieren.
 	 */
-	public HBCIMsgStatus[] msgStatus;
+	private HBCIMsgStatus[] msgStatus;
 
 	/**
 	 * Statusinformationen zur Dialog-Abschluss-Nachricht. In diesem Feld
 	 * werden alle Status-Informationen gespeichert, die die Nachrichten zur
 	 * Beendigung des Dialoges betreffen.
 	 */
-	public HBCIMsgStatus endStatus;
+	private HBCIMsgStatus endStatus;
 
 	public HBCIDialogStatus()
 	{
-		msgStatus = null;
-		initStatus = null;
-		endStatus = null;
 	}
 
-	/** Wird von der <em>HBCI4Java</em>-Dialog-Engine aufgerufen */
+	/**
+	 * Wird von der <em>HBCI4Java</em>-Dialog-Engine aufgerufen
+	 */
 	public void setInitStatus( HBCIMsgStatus status )
 	{
 		this.initStatus = status;
 	}
 
-	/** Wird von der <em>HBCI4Java</em>-Dialog-Engine aufgerufen */
+	/**
+	 * Wird von der <em>HBCI4Java</em>-Dialog-Engine aufgerufen
+	 */
 	public void setMsgStatus( HBCIMsgStatus[] status )
 	{
 		this.msgStatus = status;
 	}
 
-	/** Wird von der <em>HBCI4Java</em>-Dialog-Engine aufgerufen */
+	/**
+	 * Wird von der <em>HBCI4Java</em>-Dialog-Engine aufgerufen
+	 */
 	public void setEndStatus( HBCIMsgStatus status )
 	{
 		this.endStatus = status;
 	}
 
 	/**
-	 * <p>
 	 * Gibt zurück, ob der Dialog als ganzes erfolgreich abgelaufen ist.
 	 * Ein Dialog gilt dann als erfolgreich abgelaufen, wenn die Dialog-Initialisierung,
 	 * alle Nachrichten mit Geschäftsvorfällen sowie der Dialog-Abschluss ohne
 	 * Fehlermeldungen abgelaufen sind.
-	 * </p>
 	 * <p>
 	 * Sobald auch nur eine dieser Nachrichten einen Fehler erzeugt hat, gibt diese
 	 * Methode <code>false</code> zurück. Es handelt sich also um einen sehr
@@ -112,7 +110,6 @@ public final class HBCIDialogStatus
 	 * aufgetretene Fehler entfallen (siehe jedoch unten). Beim Rückgabewert
 	 * <code>false</code> müssen alle ausgeführten Geschäftsvorfälle überprüft
 	 * werden, ob einer (oder mehrere) davon den (oder die) Fehler ausgelöst haben.
-	 * </p>
 	 * <p>
 	 * <b>Achtung:</b> Wenn diese Methode <code>true</code> zurückgibt, heißt
 	 * das nicht zwangsläufig, dass auch alle geplanten <code>HBCIJobs</code>
@@ -125,13 +122,11 @@ public final class HBCIDialogStatus
 	 * obwohl gar nicht alle geplanten Aufträge ausgeführt wurden (eben weil diese
 	 * Methode nur anzeigt, ob bei der eigentlichen <em>Ausführung</em> von Aufträgen
 	 * Fehler aufgetreten sind oder nicht).
-	 * </p>
 	 * <p>
 	 * Um also sicher zu gehen, dass alle gewünschten Aufträge auch wirklich
 	 * erfolgreich ausgeführt wurden, sollte von jedem ursprünglich erzeugten
 	 * <code>HBCIJob</code> der Status mit {@link org.kapott.hbci.GV.HBCIJob#getJobResult()} und
 	 * {@link org.kapott.hbci.GV_Result.HBCIJobResult#isOK()} geprüft werden.
-	 * </p>
 	 * 
 	 * @return <code>true</code>, wenn keine Nachricht des Dialoges einen Fehler
 	 *         erzeugt hat; <code>false</code>, wenn wenigstens ein Nachrichtenaustausch
@@ -152,6 +147,24 @@ public final class HBCIDialogStatus
 		ret &= (endStatus != null && endStatus.isOK());
 
 		return ret;
+	}
+
+	public HBCIMsgStatus getFailedMsgStatus()
+	{
+		List<HBCIMsgStatus> allStatuses = new ArrayList<>();
+		allStatuses.add( initStatus );
+		allStatuses.addAll( Arrays.asList( msgStatus ) );
+		allStatuses.add( endStatus );
+
+		for ( HBCIMsgStatus status : allStatuses )
+		{
+			if ( !status.isOK() )
+			{
+				return status;
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -199,7 +212,7 @@ public final class HBCIDialogStatus
 	 */
 	public Exception[] getExceptions()
 	{
-		List<Exception> ret = new ArrayList<Exception>();
+		List<Exception> ret = new ArrayList<>();
 
 		if ( initStatus != null )
 		{
@@ -234,7 +247,7 @@ public final class HBCIDialogStatus
 	 */
 	public String getErrorString()
 	{
-		StringBuffer ret = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 
 		if ( initStatus != null )
 		{
@@ -243,8 +256,8 @@ public final class HBCIDialogStatus
 			{
 				// ret.append(HBCIUtils.getLocMsg("STAT_INIT")).append(":");
 				// ret.append(System.lineSeparator());
-				ret.append( s );
-				ret.append( System.lineSeparator() );
+				sb.append( s );
+				sb.append( System.lineSeparator() );
 			}
 		}
 
@@ -259,8 +272,8 @@ public final class HBCIDialogStatus
 					// ret.append(Integer.toString(i+1));
 					// ret.append(":");
 					// ret.append(System.lineSeparator());
-					ret.append( s );
-					ret.append( System.lineSeparator() );
+					sb.append( s );
+					sb.append( System.lineSeparator() );
 				}
 			}
 		}
@@ -272,12 +285,12 @@ public final class HBCIDialogStatus
 			{
 				// ret.append(HBCIUtils.getLocMsg("STAT_END")).append(":");
 				// ret.append(System.lineSeparator());
-				ret.append( s );
-				ret.append( System.lineSeparator() );
+				sb.append( s );
+				sb.append( System.lineSeparator() );
 			}
 		}
 
-		return ret.toString().trim();
+		return sb.toString().trim();
 	}
 
 	/**
@@ -327,7 +340,7 @@ public final class HBCIDialogStatus
 
 		return sb.toString().trim();
 	}
-	
+
 	/**
 	 * Wandelt alle Statusinformationen zu einem Dialog in einen
 	 * einzigen String um. Zu jeder einzelnen Nachricht des Dialoges

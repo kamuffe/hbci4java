@@ -99,9 +99,6 @@ public class HBCIPassportPinTan
 		super( callback, initObject );
 		setFileName( fileName );
 
-//		String header = "client.passport.PinTan.";
-//		boolean init = HBCIUtils.getParam( header + "init", "1" ).equals( "1" );
-
 		if ( fileName != null )
 		{
 			this.read();

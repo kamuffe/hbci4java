@@ -1,60 +1,23 @@
 ## Vorab
 
-Dies ist ein aktuell gepflegter Fork von [HBCI4Java](http://hbci4java.kapott.org/),
-welcher u.a. in [Hibiscus](http://www.willuhn.de/products/hibiscus) und
-[Pecunia-Banking](http://www.pecuniabanking.de/) zum Einsatz kommt.
-
-## Kontakt
-
-Unter https://groups.google.com/forum/?hl=de#!forum/hbci4java findet ihr die
-zugehörige Mailingliste.
-
-## Entstehung
-
-Das Projekt entstand 2010 als Fork von http://hbci4java.kapott.org, da dessen Weiterentwicklung eingestellt wurde.
-
-Seither wurden umfangreiche neue Features hinzugefügt wie etwa:
-
-- Die Unterstützung der neuen TAN-Verfahren (smsTAN, photoTAN, chipTAN - incl. Implementierung des HHD-Standards mit Flicker-Code)
-- Unterstützung von PC/SC-Kartenlesern via javax.smartcardio API
-- Eine aktuelle Bankenliste (mit BLZ, Server-Adresse, HBCI-Version,...)
-- Support für alle aktuellen SEPA-PAIN-Versionen
-- SEPA-Überweisungen und -Lastschriften (jeweils Einzel- und Sammelaufträge) sowie SEPA-Daueraufträge 
-- Abruf des elektronischen Kontoauszuges (HKEKA und HKEKP)
-- Unterstützung für chipTAN USB
-- Abruf von Umsätzen im CAMT-Format (HKCAZ)
-
-## Lizenz
-
-LGPL 2.1 - GNU Lesser General Public License, version 2.1 (http://www.gnu.org/licenses/old-licenses/lgpl-2.1)
-
-*Hinweis*
-Bis 02.05.2016 unterlag HBCI4Java der GPLv2 - wurde mit https://github.com/willuhn/hbci4java/issues/36 aber auf LGPL 2.1 geändert.
-
-## Download
-
-Du kannst die aktuellste Version von HBCI4Java in Maven Central finden:
-
-https://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.github.hbci4j%22%20AND%20a%3A%22hbci4j-core%22
+Dies ist ein Fork von [HBCI4Java](https://github.com/hbci4j/hbci4java). Die Wichtigste Änderung besteht darin HBCI4Java auch gefahrlos in Webanwendungen zu verwenden OHNE die statischen Initialisierungs und Aufräum operationen.
 
 
-*Maven*
+## Änderungen/Erweiterungen 
 
-```
-<dependency>
-   <groupId>com.github.hbci4j</groupId>
-   <artifactId>hbci4j-core</artifactId>
-</dependency>
-```
 
-*Gradle*
 
-```
-dependencies {
-  compile 'com.github.hbci4j:hbci4j-core:+'
-}
-```
+- static Umbau der HBCIUtils und HBCIUtilsInternal um HBCI4Java auch in Webanwendungen einsetzen zu können (u.a. entfernen der ThreadPool Logik)
+  So wird jedesmal wenn ein Handle erzeugt wird eine neue Instanz von HBCIHandler, HBCIKernel, HBCIPassport und HBCICallback erzeugt, die nicht in andere Threads geshared werden.
+- Logging basierend auf slf4j
+- Passports werden direkt über den Konstruktoraufruf erzeugt und nicht über eine Methode mit String parameter am Handler. Das ist einfacher für den Entwickler da Fehler bereits zur Compilezeit erkannt werden.
+- Verarltete Logik basierend auf Arrays umgebaut auf generische Listen
 
+
+## Ausstehende Arbeiten 
+- locking der passport datei wenn multithreaded lesend/schreibend darauf zugegriffen wird
+- Filtering der log Ausgaben von sensiblen Daten
+- weiteres refactoring (private member variablen statt public, lists vs. arrays, doppelten code entfernen => rewriters, kapselung verbessern)
 
 
 ## Selbst compilieren

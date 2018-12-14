@@ -66,8 +66,8 @@ public abstract class AbstractPinTanPassport
 
 	private boolean verifyTANMode;
 
-	private Hashtable<String, Properties> twostepMechanisms;
-	private List<String> allowedTwostepMechanisms;
+	private Hashtable<String, Properties> twostepMechanisms = new Hashtable<String, Properties>();
+	private List<String> allowedTwostepMechanisms = new ArrayList<String>();
 
 	private String currentTANMethod;
 	private boolean currentTANMethodWasAutoSelected;
@@ -77,8 +77,13 @@ public abstract class AbstractPinTanPassport
 	public AbstractPinTanPassport( HBCICallback callback, Object initObject )
 	{
 		super( callback, initObject );
-		this.twostepMechanisms = new Hashtable<String, Properties>();
-		this.allowedTwostepMechanisms = new ArrayList<String>();
+		
+		// TCP-Port des Servers. Bei PIN/TAN immer 443, da das ja ueber HTTPS laeuft.
+		setPort( 443 );
+		
+		// Art der Nachrichten-Codierung. Bei Chipkarte/Schluesseldatei wird
+		// "None" verwendet. Bei PIN/TAN kommt "Base64" zum Einsatz.
+		setFilterType( "Base64" );
 	}
 
 	public String getPassportTypeName()

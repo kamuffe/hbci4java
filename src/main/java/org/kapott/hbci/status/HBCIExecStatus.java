@@ -274,9 +274,8 @@ public class HBCIExecStatus
 		boolean ok = true;
 		List<String> customerIds = getCustomerIds();
 
-		for ( Iterator<String> i = customerIds.iterator(); i.hasNext(); )
+		for ( String customerId : customerIds )
 		{
-			String customerId = i.next();
 			ok &= isOK( customerId );
 		}
 
